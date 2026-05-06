@@ -1,0 +1,811 @@
+﻿---
+title: "complexr: Análisis de Datos de Encuestas Complejas"
+author: "Stalyn Guerrero Gómez"
+date: today
+lang: es
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-title: "Contenido"
+    number-sections: true
+    code-fold: false
+    code-tools: true
+    theme: flatly
+    highlight-style: github
+    df-print: kable
+    fig-width: 8
+    fig-height: 5
+vignette: >
+  %\VignetteIndexEntry{complexr: Análisis de Datos de Encuestas Complejas}
+  %\VignetteEngine{quarto::html}
+  %\VignetteEncoding{UTF-8}
+bibliography: references.bib
+---
+
+```{r}
+#| label: setup
+#| include: false
+knitr::opts_chunk$set(
+  collapse  = TRUE,
+  comment   = "#>",
+  message   = FALSE,
+  warning   = FALSE,
+  fig.align = "center"
+)
+```
+
+## Descripción general {.unnumbered}
+
+**complexr** es un paquete de R que proporciona un marco de
+trabajo orientado a *tidy* para el análisis de datos de encuestas
+complejas. Soporta:
+
+- Lectura de microdatos en múltiples formatos (CSV, XLSX, SPSS, Stata, RDS)
+- Construcción y diagnóstico de diseños de muestreo estratificado y
+  por conglomerados
+- Estimación de medias, totales, proporciones, razones y cuantiles
+  poblacionales con estimación correcta de varianza bajo diseños complejos
+- Derivación de nuevas variables a partir de datos de encuesta existentes
+- Lanzamiento de una aplicación Shiny interactiva para análisis
+  punto-y-clic
+
+Todas las funciones de estimación tienen en cuenta la estratificación,
+el agrupamiento y los pesos de muestreo desiguales, siguiendo el enfoque
+de linealización descrito en @lumley2010 y @sarndal1992.
+
+---
+
+## Marco conceptual y notación {#sec-notacion}
+
+Esta sección establece la notación estadística utilizada a lo largo de
+la viñeta, siguiendo las convenciones de @gutierrez2025.
+
+### Población y muestra
+
+Sea $U = \{1, 2, \ldots, N\}$ la **población finita** de tamaño $N$, y
+$s \subset U$ la **muestra** seleccionada bajo un diseño probabilístico
+$p(s)$. Para cada unidad $k \in U$, se define $y_k$ como el valor de la
+variable de interés. El **total poblacional** y la **media poblacional**
+se definen respectivamente como:
+
+$$
+Y = \sum_{k \in U} y_k, \qquad \bar{Y} = \frac{Y}{N}.
+$$
+
+### Pesos de diseño y pesos ajustados
+
+La probabilidad de que la unidad $k$ sea incluida en la muestra se
+denota $\pi_k = \Pr(k \in s) > 0$. El **peso básico de diseño** es
+$d_k = 1/\pi_k$. En la práctica, estos pesos se modifican para
+incorporar ajustes por no respuesta o calibración a totales conocidos,
+obteniéndose los **pesos ajustados** $w_k$. En esta documentación, $w_k$
+denota los pesos finales disponibles en el archivo de microdatos
+(variable `weight`).
+
+### Estimador de Horvitz–Thompson
+
+El estimador de Horvitz–Thompson (HT) del total poblacional es
+[@horvitz1952]:
+
+$$
+\hat{Y}_{HT} = \sum_{k \in s} d_k\, y_k,
+$$
+
+y el estimador del tamaño poblacional se define como:
+
+$$
+\hat{N}_{HT} = \sum_{k \in s} d_k.
+$$
+
+Cuando se trabaja con pesos ajustados $w_k$, el estimador HT ponderado
+toma la forma $\hat{Y}_w = \sum_{k \in s} w_k\, y_k$.
+
+### Varianza bajo el enfoque de diseño
+
+La varianza del estimador HT se estima como [@sarndal1992]:
+
+$$
+\hat{V}_p\!\left(\hat{Y}_{HT}\right) =
+\sum_{k \in s}\sum_{l \in s}
+\bigl(d_k d_l - d_{kl}\bigr)\, y_k\, y_l,
+$$
+
+donde $d_{kl} = 1/\pi_{kl}$ y $\pi_{kl} = \Pr(k, l \in s)$ son las
+probabilidades de inclusión de segundo orden. En la práctica se emplean
+métodos equivalentes como la **linealización de Taylor** o la
+**replicación** (*jackknife*, *bootstrap*), que no requieren el cálculo
+explícito de $\pi_{kl}$.
+
+### Diseño estratificado multietápico
+
+Para un diseño con $H$ estratos, $\alpha_h$ unidades primarias de
+muestreo (UPM) en el estrato $h$ y $n_{h\alpha}$ observaciones en la
+UPM $\alpha$, el estimador del total es:
+
+$$
+\hat{Y}_{HT} = \sum_{h=1}^{H}\sum_{\alpha=1}^{\alpha_h}
+\sum_{k=1}^{n_{h\alpha}} \omega_{h\alpha k}\, y_{h\alpha k},
+$$
+
+donde $\omega_{h\alpha k}$ es el peso ajustado del individuo $k$ en la
+UPM $\alpha$ del estrato $h$.
+
+### Efecto del diseño (DEFF)
+
+Siguiendo a @kish1965, el efecto del diseño se define como la razón
+entre la varianza del estimador bajo el diseño complejo y la varianza
+del mismo estimador bajo un muestreo aleatorio simple (MAS) de igual
+tamaño:
+
+$$
+\widehat{\text{DEFF}} =
+\frac{\hat{V}_p(\hat{\theta})}{\hat{V}_{\text{SRS}}(\hat{\theta})}.
+$$
+
+Un valor $\widehat{\text{DEFF}} > 1$ indica que el diseño complejo
+incrementa la varianza con respecto al MAS, mientras que
+$\widehat{\text{DEFF}} < 1$ señala una ganancia de eficiencia, típica
+de diseños estratificados con estratos homogéneos.
+
+---
+
+## Instalación
+
+```{r}
+#| label: install
+#| eval: false
+# Instalar desde GitHub
+# install.packages("remotes")
+remotes::install_github("stalynGuerrero/complexr")
+```
+
+```{r}
+#| label: load
+library(complexr)
+```
+
+---
+
+## Datos simulados
+
+El paquete incluye `generate_example_data()`, que genera un conjunto de
+datos jerárquico de tres niveles (UPMs → hogares → individuos),
+representativo de un diseño de encuesta multietápica estratificada.
+
+```{r}
+#| label: gen-data
+data <- generate_example_data(n_upm = 100, seed = 123)
+dplyr::glimpse(data)
+```
+
+### Variables
+
+| Variable | Tipo | Descripción |
+|---|---|---|
+| `strata` | character | Identificador de estrato ($h = 1,\ldots,H$) |
+| `upm` | character | Unidad primaria de muestreo $\alpha$ dentro del estrato $h$ |
+| `hogar_id` | character | Identificador de hogar |
+| `persona_id` | character | Identificador de individuo $k$ |
+| `weight` | numeric | Peso ajustado $w_k$ (inverso de la prob. de inclusión, calibrado) |
+| `region` | character | Dominio de estimación: Norte / Centro / Sur |
+| `sexo` | character | Sexo: Hombre / Mujer |
+| `area` | character | Área: Urbana / Rural |
+| `edad` | numeric | Edad en años |
+| `educacion` | factor | Nivel educativo: Primaria / Secundaria / Superior |
+| `empleo` | factor | Condición de empleo: Formal / Informal / Desocupado |
+| `ingreso_pc` | numeric | Ingreso per cápita del hogar ($y_k$) |
+| `gasto_pc` | numeric | Gasto per cápita del hogar |
+| `pobre` | numeric | Indicador binario de pobreza: $y_k \in \{0, 1\}$ |
+| `ingreso2` | numeric | Variable auxiliar de ingreso (10 % de valores faltantes) |
+
+### Jerarquía y consistencia interna
+
+La simulación garantiza las siguientes consistencias:
+
+- Los pesos son constantes dentro del hogar:
+  $w_{h\alpha k} = w_{h\alpha}$ para todo $k$ en el hogar.
+- El ingreso per cápita es constante dentro del hogar:
+  $y_{h\alpha k} = Y_{h\alpha} / N_{h\alpha}$.
+- Los individuos menores de 5 años tienen `NA` en educación.
+
+El ingreso del hogar sigue un modelo gamma jerárquico con efectos
+aleatorios de UPM y hogar:
+
+$$
+Y_{h\alpha} \sim \text{Gamma}\!\left(\alpha_0,\;
+\beta_0 \cdot \exp(u_{h\alpha} + v_{h\alpha k})\right)
+$$
+
+donde $u_{h\alpha} \sim N(0, 0{,}09)$ es el efecto de UPM y
+$v_{h\alpha k} \sim N(0, 0{,}04)$ es el efecto de hogar.
+
+---
+
+## Lectura de datos externos
+
+Para cargar sus propios microdatos utilice `read_survey_data()`. Los
+formatos soportados se detectan automáticamente a partir de la extensión
+del archivo.
+
+```{r}
+#| label: read-data
+#| eval: false
+# CSV
+data <- read_survey_data("encuesta.csv")
+
+# SPSS
+data <- read_survey_data("encuesta.sav")
+
+# Stata
+data <- read_survey_data("encuesta.dta")
+
+# Excel
+data <- read_survey_data("encuesta.xlsx")
+```
+
+La función retorna los datos como un `tibble` y adjunta atributos de
+metadatos: `source_path`, `source_format`, `n_rows`, `n_cols`.
+
+---
+
+## Derivación de variables
+
+`mutate_survey_data()` crea nuevas variables a partir de una lista
+nombrada de fórmulas unilaterales, evaluadas secuencialmente en el
+entorno del marco de datos.
+
+```{r}
+#| label: mutate
+data <- mutate_survey_data(
+  data,
+  definitions = list(
+    log_ingreso = ~ log(ingreso_pc + 1),
+    ratio_gasto = ~ gasto_pc / ingreso_pc
+  )
+)
+
+dplyr::select(data, ingreso_pc, log_ingreso, ratio_gasto) |> head(4)
+```
+
+---
+
+## Diseño muestral
+
+### Construcción del objeto de diseño
+
+`as_survey_design_tbl()` envuelve `survey::svydesign()` y retorna un
+objeto `tbl_svy` compatible con el ecosistema **srvyr** / **survey**
+[@lumley2010].
+
+```{r}
+#| label: design
+design <- as_survey_design_tbl(
+  data    = data,
+  weight  = "weight",
+  strata  = "strata",
+  cluster = "upm",
+  nest    = TRUE
+)
+
+class(design)
+```
+
+Configuraciones soportadas:
+
+| Configuración | Argumentos |
+|---|---|
+| Muestreo aleatorio simple (MAS) | solo `weight` |
+| Estratificado | `weight` + `strata` |
+| Por conglomerados (etapa única) | `weight` + `cluster` |
+| Estratificado multietápico | `weight` + `strata` + `cluster` |
+| Con corrección de población finita | cualquiera de los anteriores + `fpc` |
+
+La función valida que los pesos $w_k$ sean estrictamente positivos
+($w_k > 0$) y sin valores faltantes, y opcionalmente verifica que las
+UPMs no se compartan entre estratos (`check_psu = TRUE`).
+
+:::{.callout-note}
+Cuando un estrato $h$ contiene una única UPM ($\alpha_h = 1$), la
+estimación de $\hat{V}_p$ por linealización de Taylor no está definida.
+La función establece automáticamente
+`options(survey.lonely.psu = "adjust")` para usar la aproximación
+conservadora centrada en la media del estrato [@cochran1977].
+:::
+
+### Diagnóstico del diseño
+
+```{r}
+#| label: describe
+describe_survey_design(design)
+```
+
+La tabla de diagnóstico reporta:
+
+| Columna | Descripción |
+|---|---|
+| `n_obs` | Tamaño total de la muestra $n = \lvert s \rvert$ |
+| `n_strata` | Número de estratos $H$ |
+| `n_clusters` | Número de UPMs $\sum_h \alpha_h$ |
+| `weight_min` | $\min_{k \in s} w_k$ |
+| `weight_max` | $\max_{k \in s} w_k$ |
+| `weight_mean` | $\bar{w} = \hat{N}_{HT}/n$ |
+| `weight_cv` | $CV(w) = s_w / \bar{w}$ |
+
+---
+
+## Estimación
+
+Todos los estimadores se calculan con `estimate_survey()`. La función
+retorna un `tibble` con las siguientes columnas:
+
+| Columna | Descripción |
+|---|---|
+| `variable` | Nombre de la variable objetivo |
+| `estimator` | Tipo de estimador |
+| `estimate` | Estimación puntual $\hat{\theta}$ |
+| `se` | Error estándar $ee(\hat{\theta}) = \sqrt{\hat{V}_p(\hat{\theta})}$ |
+| `cv` | Coeficiente de variación $CV = ee(\hat{\theta})/\hat{\theta}$ |
+| `deff` | Efecto de diseño $\widehat{\text{DEFF}}$ |
+| `lci` | Límite inferior del intervalo de confianza |
+| `uci` | Límite superior del intervalo de confianza |
+| `quality` | Etiqueta de precisión basada en el $CV$ |
+
+**Etiquetas de precisión** (basadas en el coeficiente de variación):
+
+| $CV$ | Etiqueta |
+|---|---|
+| $< 5\%$ | Precisión muy alta |
+| $5\%$–$10\%$ | Precisión alta |
+| $10\%$–$20\%$ | Precisión aceptable |
+| $20\%$–$30\%$ | Usar con precaución |
+| $\geq 30\%$ | Precisión baja |
+
+### Media poblacional
+
+El total poblacional ponderado se estima mediante el estimador HT:
+
+$$
+\hat{Y}_w = \sum_{k \in s} w_k\, y_k,
+\qquad
+\hat{N}_w = \sum_{k \in s} w_k.
+$$
+
+La **media ponderada** (estimador de razón de Horvitz–Thompson) es:
+
+$$
+\bar{y}_w = \frac{\hat{Y}_w}{\hat{N}_w}
+= \frac{\displaystyle\sum_{k \in s} w_k\, y_k}{\displaystyle\sum_{k \in s} w_k}.
+$$
+
+La varianza de $\bar{y}_w$ se estima por linealización de Taylor
+[@sarndal1992]:
+
+$$
+\hat{V}_p\!\left(\bar{y}_w\right) =
+\frac{1}{\hat{N}_w^2}\,
+\hat{V}_p\!\left(\hat{Y}_w\right).
+$$
+
+```{r}
+#| label: mean
+r_media <- estimate_survey(
+  design    = design,
+  variable  = "ingreso_pc",
+  estimator = "mean"
+)
+r_media
+```
+
+### Total poblacional
+
+El estimador HT del total, bajo un diseño estratificado con UPMs, es:
+
+$$
+\hat{Y}_w =
+\sum_{h=1}^{H}\sum_{\alpha=1}^{\alpha_h}\sum_{k=1}^{n_{h\alpha}}
+\omega_{h\alpha k}\, y_{h\alpha k}.
+$$
+
+Su varianza se estima por estratos y conglomerados:
+
+$$
+\hat{V}_p\!\left(\hat{Y}_w\right) =
+\sum_{h=1}^{H}
+\hat{V}_{p,h}\!\left(\hat{Y}_{w,h}\right),
+$$
+
+donde $\hat{V}_{p,h}$ se calcula dentro de cada estrato $h$ usando los
+residuos de los totales de UPM respecto a su media en el estrato.
+
+```{r}
+#| label: total
+r_total <- estimate_survey(
+  design    = design,
+  variable  = "ingreso_pc",
+  estimator = "total"
+)
+r_total
+```
+
+### Proporciones
+
+#### Variable binaria
+
+Para una variable indicadora $y_k \in \{0, 1\}$, la **proporción
+poblacional** $\pi$ se estima como:
+
+$$
+\hat{p} =
+\frac{\displaystyle\sum_{h=1}^{H}\sum_{\alpha=1}^{\alpha_h}
+\sum_{k=1}^{n_{h\alpha}} \omega_{h\alpha k}\, I(y_k = 1)}
+{\displaystyle\sum_{h=1}^{H}\sum_{\alpha=1}^{\alpha_h}
+\sum_{k=1}^{n_{h\alpha}} \omega_{h\alpha k}}
+= \frac{\hat{N}_1}{\hat{N}_w}.
+$$
+
+La varianza de $\hat{p}$ se aproxima por linealización de Taylor
+[@heeringa2017]:
+
+$$
+\hat{V}_p(\hat{p}) \;\dot{=}\;
+\frac{\hat{V}_p(\hat{N}_1) + \hat{p}^2\,\hat{V}_p(\hat{N}_w)
+- 2\hat{p}\,\widehat{\text{cov}}(\hat{N}_1, \hat{N}_w)}
+{\hat{N}_w^2}.
+$$
+
+```{r}
+#| label: prop-binaria
+r_pobre <- estimate_survey(
+  design    = design,
+  variable  = "pobre",
+  estimator = "prop"
+)
+r_pobre
+```
+
+#### Variable categórica multinomial
+
+Para una variable con categorías $\mathcal{K} = \{k_1, k_2, \ldots\}$,
+la proporción de la categoría $k$ es:
+
+$$
+\hat{p}_k =
+\frac{\displaystyle\sum_{h=1}^{H}\sum_{\alpha=1}^{\alpha_h}
+\sum_{i=1}^{n_{h\alpha}} \omega_{h\alpha i}\, I(y_i = k)}
+{\displaystyle\sum_{h=1}^{H}\sum_{\alpha=1}^{\alpha_h}
+\sum_{i=1}^{n_{h\alpha}} \omega_{h\alpha i}}
+= \frac{\hat{N}_k}{\hat{N}_w}.
+$$
+
+La función construye automáticamente la variable indicadora $I(y_i = k)$
+para cada categoría:
+
+```{r}
+#| label: prop-cat
+r_empleo <- estimate_survey(
+  design    = design,
+  variable  = "empleo",
+  estimator = "prop"
+)
+r_empleo
+```
+
+### Estimador de razón
+
+El estimador de razón de dos totales poblacionales es [@cochran1977]:
+
+$$
+\hat{R} = \frac{\hat{Y}_w}{\hat{X}_w}
+= \frac{\displaystyle\sum_{k \in s} w_k\, y_k}
+       {\displaystyle\sum_{k \in s} w_k\, x_k}.
+$$
+
+La varianza se estima por linealización de Taylor de primer orden:
+
+$$
+\hat{V}_p(\hat{R}) \approx
+\frac{1}{\hat{X}_w^2}\,
+\hat{V}_p\!\left(\hat{Y}_w - \hat{R}\,\hat{X}_w\right).
+$$
+
+**Numérico / Numérico:**
+
+```{r}
+#| label: razon-num
+r_razon <- estimate_survey(
+  design      = design,
+  estimator   = "ratio",
+  numerator   = "ingreso_pc",
+  denominator = "gasto_pc"
+)
+r_razon
+```
+
+**Categórico / Categórico** — razón de trabajadores Formales respecto a
+Informales ($\hat{N}_{\text{Formal}} / \hat{N}_{\text{Informal}}$):
+
+```{r}
+#| label: razon-cat
+r_razon_cat <- estimate_survey(
+  design          = design,
+  estimator       = "ratio",
+  numerator       = "empleo",
+  denominator     = "empleo",
+  ratio_num_level = "Formal",
+  ratio_den_level = "Informal"
+)
+r_razon_cat
+```
+
+**Numérico / Categórico** — ingreso promedio entre trabajadores
+formales, equivalente a $\hat{Y}_{\text{ingreso}} / \hat{N}_{\text{Formal}}$:
+
+```{r}
+#| label: razon-mixta
+r_razon_mix <- estimate_survey(
+  design          = design,
+  estimator       = "ratio",
+  numerator       = "ingreso_pc",
+  denominator     = "empleo",
+  ratio_den_level = "Formal"
+)
+r_razon_mix
+```
+
+### Cuantiles
+
+Los cuantiles se derivan de la **función de distribución acumulada
+empírica ponderada** [@woodruff1952]:
+
+$$
+\hat{F}_w(t) =
+\frac{\displaystyle\sum_{k \in s} w_k\, I(y_k \le t)}
+     {\displaystyle\sum_{k \in s} w_k}
+= \frac{\hat{N}(y \le t)}{\hat{N}_w}.
+$$
+
+El cuantil de orden $p \in (0,1)$ se define como:
+
+$$
+\hat{q}_p = \inf\bigl\{t : \hat{F}_w(t) \ge p\bigr\}.
+$$
+
+Los intervalos de confianza se calculan con el método de linealización
+de Woodruff, que transforma el problema a la escala de la proporción
+acumulada:
+
+$$
+IC_p[\hat{q}_p] =
+\left\{t : \hat{F}_w(t) \in
+\left[p \pm t_{1-\alpha/2,\,gl}\; ee(\hat{F}_w(t))\right]\right\}.
+$$
+
+```{r}
+#| label: cuantiles
+r_cuant <- estimate_survey(
+  design    = design,
+  variable  = "ingreso_pc",
+  estimator = "quantile",
+  probs     = c(0.10, 0.25, 0.50, 0.75, 0.90)
+)
+r_cuant
+```
+
+---
+
+## Estimación por dominios
+
+En encuestas de hogares es frecuente estimar parámetros para
+**subpoblaciones** o **dominios** $U_d \subset U$. El estimador de razón
+en el dominio $d$ es:
+
+$$
+\bar{y}_{w,d} =
+\frac{\displaystyle\sum_{k \in s} w_k\, y_k\, I(k \in U_d)}
+     {\displaystyle\sum_{k \in s} w_k\, I(k \in U_d)}
+= \frac{\hat{Y}_{w,d}}{\hat{N}_{w,d}}.
+$$
+
+La estimación de $\hat{V}_p(\bar{y}_{w,d})$ se realiza sobre la muestra
+completa $s$, preservando la estructura del diseño y evitando el sesgo
+por *subsetting* incorrecto [@lumley2010].
+
+### Efecto de diseño de dominio
+
+El efecto de diseño para el dominio $d$ se define de forma análoga al
+DEFF global [@kish1965]:
+
+$$
+\widehat{\text{DEFF}}_d =
+\frac{\hat{V}_p(\hat{\theta}_d)}
+     {\hat{V}_{\text{SRS}}(\hat{\theta}_d)},
+$$
+
+donde $\hat{V}_{\text{SRS}}(\hat{\theta}_d)$ es la varianza que se
+obtendría bajo un MAS restringido al dominio $d$. Para la media de
+dominio, esta expresión se simplifica a:
+
+$$
+\hat{V}_{\text{SRS}}(\bar{y}_{w,d}) =
+\left(1 - \frac{n_d}{N_d}\right)\frac{S_{y,d}^2}{n_d},
+$$
+
+con $n_d = \sum_{k \in s} I(k \in U_d)$ el tamaño muestral en el
+dominio, $N_d \approx \hat{N}_{w,d}$ el tamaño poblacional estimado del
+dominio, y $S_{y,d}^2$ la varianza muestral no ponderada dentro del
+dominio. Valores $\widehat{\text{DEFF}}_d > 1$ indican que la
+conglomeración o la ponderación desigual inflan la varianza incluso
+dentro del dominio.
+
+El argumento `by` controla los dominios de estimación:
+
+```{r}
+#| label: dominio-media
+r_region <- estimate_survey(
+  design    = design,
+  variable  = "ingreso_pc",
+  estimator = "mean",
+  by        = "region"
+)
+r_region
+```
+
+Se admiten múltiples variables de dominio (dominios cruzados
+$U_{d_1} \cap U_{d_2}$):
+
+```{r}
+#| label: dominio-multi
+r_region_area <- estimate_survey(
+  design    = design,
+  variable  = "ingreso_pc",
+  estimator = "mean",
+  by        = c("region", "area")
+)
+r_region_area
+```
+
+Proporciones por dominio:
+
+```{r}
+#| label: dominio-prop
+r_pobre_region <- estimate_survey(
+  design    = design,
+  variable  = "pobre",
+  estimator = "prop",
+  by        = "region"
+)
+r_pobre_region
+```
+
+---
+
+## Presentación de resultados
+
+`format_results_table()` redondea columnas numéricas, calcula el $CV$
+o los intervalos de confianza faltantes, y garantiza que la salida
+contenga siempre las columnas `estimate`, `se`, `cv`, `lci` y `uci`.
+
+```{r}
+#| label: formato
+format_results_table(r_region, digits = 3)
+```
+
+---
+
+## Visualización
+
+`plot_results_bar()` genera un gráfico de barras de `ggplot2` con
+barras de error que representan el intervalo de confianza
+$[\hat{\theta} - t\, ee(\hat{\theta}),\; \hat{\theta} + t\, ee(\hat{\theta})]$.
+Las variables de dominio se detectan automáticamente como cualquier
+columna que no forme parte de las columnas de salida estándar.
+
+```{r}
+#| label: grafico-region
+#| fig-cap: "Ingreso per cápita por región — $\\bar{y}_{w,d}$ con IC 95%"
+plot_results_bar(r_region)
+```
+
+```{r}
+#| label: grafico-multi
+#| fig-cap: "Ingreso per cápita por región y área — $\\bar{y}_{w,d}$ con IC 95%"
+plot_results_bar(r_region_area)
+```
+
+Los gráficos de proporción restringen automáticamente el eje $y$ a
+$[0, 1]$:
+
+```{r}
+#| label: grafico-prop
+#| fig-cap: "Tasa de pobreza por región — $\\hat{p}_d$ con IC 95%"
+plot_results_bar(r_pobre_region)
+```
+
+---
+
+## Aplicación Shiny
+
+El paquete incluye una aplicación Shiny interactiva completa que cubre
+todo el proceso de análisis:
+
+1. **Datos** — cargue CSV / RDS / XLSX o use los datos de ejemplo
+   integrados
+2. **Diseño muestral** — elija MAS, estratificado o conglomerados
+   multietápico; seleccione las variables $w_k$, $h$, $\alpha$;
+   consulte la teoría con MathJax
+3. **Estimación** — seleccione estimador ($\bar{y}_w$, $\hat{Y}_w$,
+   $\hat{p}_k$, $\hat{R}$, $\hat{q}_p$), variable objetivo y dominios;
+   ejecute e inspeccione resultados con indicadores de precisión basados
+   en el $CV$
+
+Inicie la aplicación con:
+
+```{r}
+#| label: shiny
+#| eval: false
+ComplexSurvey_app()
+```
+
+---
+
+## Ejemplo de flujo de trabajo completo
+
+```{r}
+#| label: workflow
+#| code-fold: true
+#| code-summary: "Mostrar flujo de trabajo completo"
+
+library(complexr)
+
+# 1. Generar / cargar datos
+data <- generate_example_data(n_upm = 100, seed = 2024)
+
+# 2. Derivar nuevas variables
+data <- mutate_survey_data(
+  data,
+  definitions = list(
+    log_ingreso = ~ log(ingreso_pc + 1)
+  )
+)
+
+# 3. Construir diseño muestral (estratificado multietápico)
+#    weight = w_k, strata = h, cluster = alpha
+design <- as_survey_design_tbl(
+  data    = data,
+  weight  = "weight",
+  strata  = "strata",
+  cluster = "upm",
+  nest    = TRUE
+)
+
+# 4. Diagnosticar el diseño: N_hat, H, PSUs, CV(w)
+describe_survey_design(design)
+
+# 5. Estimar media por dominio y formatear
+res <- estimate_survey(
+  design    = design,
+  variable  = "ingreso_pc",
+  estimator = "mean",
+  by        = c("region", "area")
+)
+
+format_results_table(res, digits = 2)
+```
+
+---
+
+## Información de la sesión
+
+```{r}
+#| label: sesion
+#| code-fold: true
+sessionInfo()
+```
+
+---
+
+## Referencias {.unnumbered}
+
+::: {#refs}
+:::
