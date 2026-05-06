@@ -7,22 +7,20 @@
 plot_results_bar(results)
 }
 \arguments{
-\item{results}{Tibble returned by \code{estimate_survey()}.}
+\item{results}{Tibble returned by estimate_survey().}
 }
 \value{
 A ggplot object.
 }
 \description{
-Creates a bar chart with error bars (95\% CI) from survey estimation results.
-Domain variables are detected automatically; the first domain maps to the
-x-axis and the second (if present) maps to fill colour.
+Plot survey estimates as bar chart
 }
 \examples{
 res <- data.frame(
-  region    = c("North", "South", "East"),
-  estimate  = c(0.45, 0.30, 0.55),
-  lci       = c(0.40, 0.25, 0.50),
-  uci       = c(0.50, 0.35, 0.60),
+  region   = c("North", "South", "East"),
+  estimate = c(0.45, 0.30, 0.55),
+  lci      = c(0.40, 0.25, 0.50),
+  uci      = c(0.50, 0.35, 0.60),
   estimator = "prop"
 )
 plot_results_bar(res)

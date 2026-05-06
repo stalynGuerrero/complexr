@@ -58,9 +58,7 @@ df <- read_survey_data("data/sample.csv")
 df <- read_survey_data("data/sample.sav")
 df <- read_survey_data("data/sample.dta")
 df <- read_survey_data("data/sample.sas7bdat")
-df <- read_survey_data("data/sample.xlsx", sheet = 2)
 attr(df, "source_format")
-attr(df, "n_rows")
 }
 
 }

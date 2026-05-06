@@ -108,14 +108,15 @@ mod_diseno_server <- function(id, data, dict) {
 
         "srs" = shiny::tagList(
           shiny::selectInput(ns("weight_var"),
-            i18n_t(d, "mod_diseno.weight_var"), choices = vars)
+            i18n_t(d, "mod_diseno.weight_var"), choices = vars,
+            width = "400px")
         ),
 
         "stratified" = shiny::tagList(
           shiny::selectInput(ns("strata_var"),
-            i18n_t(d, "mod_diseno.strata_var"), choices = vars),
+            i18n_t(d, "mod_diseno.strata_var"), choices = vars,width = "400px"),
           shiny::selectInput(ns("weight_var"),
-            i18n_t(d, "mod_diseno.weight_var"), choices = vars)
+            i18n_t(d, "mod_diseno.weight_var"), choices = vars,width = "400px")
         ),
 
         "cluster" = shiny::tagList(
@@ -124,9 +125,10 @@ mod_diseno_server <- function(id, data, dict) {
           shiny::uiOutput(ns("stage_clusters")),
           shiny::selectInput(ns("strata_var"),
             i18n_t(d, "mod_diseno.strata"),
-            choices = c(stats::setNames("", i18n_t(d, "mod_diseno.none")), vars)),
+            choices = c(stats::setNames("", i18n_t(d, "mod_diseno.none")),
+                        vars),width = "400px"),
           shiny::selectInput(ns("weight_var"),
-            i18n_t(d, "mod_diseno.weight_var"), choices = vars),
+            i18n_t(d, "mod_diseno.weight_var"), choices = vars,width = "400px"),
           shiny::selectInput(
             ns("lonely_psu"),
             i18n_t(d, "mod_diseno.lonely_psu"),
@@ -136,7 +138,7 @@ mod_diseno_server <- function(id, data, dict) {
                 i18n_t(d, "mod_diseno.lonely_average"),
                 i18n_t(d, "mod_diseno.lonely_certainty"))
             ),
-            selected = "adjust"
+            selected = "adjust",width = "400px"
           )
         )
       )

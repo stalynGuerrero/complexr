@@ -19,7 +19,6 @@ URL: https://github.com/stalynGuerrero/complexr
 BugReports: https://github.com/stalynGuerrero/complexr/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Depends:
     R (>= 4.1.0)
 Imports:
@@ -52,3 +51,4 @@ Suggests:
     testthat (>= 3.0.0)
 VignetteBuilder: knitr, quarto
 Config/testthat/edition: 3
+Config/roxygen2/version: 8.0.0

@@ -13,6 +13,25 @@ mod_diseno_ui <- function(id) {
         style = "color:#4A6572; font-size:13px; margin-top:4px;"
       )
     ),
+    tags$style(HTML("
+/* Altura del dropdown */
+.selectize-dropdown {
+  max-height: 300px !important;
+  overflow-y: auto;
+}
+
+/* Espaciado y legibilidad de opciones */
+.selectize-dropdown-content .option {
+  padding: 10px 12px;
+  line-height: 1.4;
+  white-space: normal;   /* permite salto de línea */
+}
+
+/* Opcional: ancho completo del dropdown */
+.selectize-control {
+  width: 100%;
+}
+")),
 
     shiny::tabsetPanel(
       id   = ns("diseno_tabs"),
@@ -34,7 +53,7 @@ mod_diseno_ui <- function(id) {
         shiny::fluidRow(
 
           shiny::column(
-            4,
+            3,
             shiny::wellPanel(
               class = "sidebar-card sidebar-card--diseno",
 
@@ -53,7 +72,12 @@ mod_diseno_ui <- function(id) {
               shiny::hr(),
 
               shiny::uiOutput(ns("design_arguments")),
-
+              
+              shiny::br(),
+              shiny::br(),
+              shiny::br(),
+              shiny::br(),
+              
               shiny::actionButton(
                 ns("build"),
                 shiny::textOutput(ns("build_btn"), inline = TRUE),
@@ -63,7 +87,7 @@ mod_diseno_ui <- function(id) {
           ),
 
           shiny::column(
-            8,
+            9,
             shiny::wellPanel(
 
               shiny::h4(shiny::textOutput(ns("design_summary"), inline = TRUE)),

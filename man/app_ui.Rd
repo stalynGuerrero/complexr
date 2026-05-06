@@ -2,7 +2,7 @@
 % Please edit documentation in R/app_ui.R
 \name{app_ui}
 \alias{app_ui}
-\title{Shiny UI for complexr — Premium v2}
+\title{Shiny UI for complexr}
 \usage{
 app_ui()
 }
@@ -10,5 +10,5 @@ app_ui()
 A Shiny UI object.
 }
 \description{
-Shiny UI for complexr — Premium v2
+Shiny UI for complexr
 }
