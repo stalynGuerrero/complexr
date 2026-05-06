@@ -1,3 +1,178 @@
+# Private helpers for estimate_survey() --------------------------------
+
+.survey_domain_keys <- function(df, by) {
+  if (is.null(by) || length(by) == 0) return(NULL)
+  dplyr::distinct(df, dplyr::across(dplyr::all_of(by)))
+}
+
+.survey_subset_by_row <- function(svy, by, row) {
+  if (is.null(by) || length(by) == 0) return(svy)
+  conds <- lapply(
+    by, function(v) call("==", as.name(v), row[[v]][[1]])
+  )
+  cond <- Reduce(function(a, b) call("&", a, b), conds)
+  subset(svy, eval(cond, svy$variables, parent.frame()))
+}
+
+.est_mean_or_total <- function(design_grp, var_sym, estimator, na_rm) {
+  if (estimator == "mean") {
+    design_grp %>%
+      srvyr::summarise(
+        estimate = srvyr::survey_mean(
+          !!var_sym, vartype = c("se", "cv"),
+          na.rm = na_rm, deff = TRUE
+        )
+      )
+  } else {
+    design_grp %>%
+      srvyr::summarise(
+        estimate = srvyr::survey_total(
+          !!var_sym, vartype = c("se", "cv"),
+          na.rm = na_rm, deff = TRUE
+        )
+      )
+  }
+}
+
+.est_prop <- function(design_grp, var_sym, variable, var_data, na_rm) {
+  uniq <- unique(stats::na.omit(var_data))
+  is_binary <- is.logical(var_data) ||
+    (is.numeric(var_data) && all(uniq %in% c(0, 1)))
+
+  if (is_binary) {
+    return(
+      design_grp %>%
+        srvyr::summarise(
+          estimate = srvyr::survey_mean(
+            !!var_sym, vartype = c("se", "cv"),
+            na.rm = na_rm, deff = TRUE
+          )
+        )
+    )
+  }
+
+  purrr::map_dfr(levels(as.factor(var_data)), function(lv) {
+    tmp <- design_grp %>%
+      dplyr::mutate(.ind = (!!var_sym) == lv) %>%
+      srvyr::summarise(
+        estimate = srvyr::survey_mean(
+          .ind, vartype = c("se", "cv"), na.rm = na_rm, deff = TRUE
+        )
+      )
+    tmp[[variable]] <- lv
+    tmp
+  })
+}
+
+.compute_ratio_numeric <- function(svy, numerator, denominator, na_rm) {
+  r <- survey::svyratio(
+    stats::as.formula(paste0("~", numerator)),
+    stats::as.formula(paste0("~", denominator)),
+    design = svy, na.rm = na_rm
+  )
+  est <- as.numeric(coef(r))
+  se  <- as.numeric(survey::SE(r))
+  tibble::tibble(
+    estimate = est,
+    se       = se,
+    cv       = ifelse(
+      abs(est) < .Machine$double.eps, NA_real_, se / est
+    ),
+    deff     = NA_real_
+  )
+}
+
+.compute_ratio_categorical <- function(
+    svy, numerator, denominator,
+    ratio_num_level, ratio_den_level,
+    num_is_cat, den_is_cat, na_rm
+) {
+  svy_tmp <- stats::update(
+    svy,
+    .num = if (num_is_cat) {
+      as.numeric(get(numerator) == ratio_num_level)
+    } else {
+      get(numerator)
+    },
+    .den = if (den_is_cat) {
+      as.numeric(get(denominator) == ratio_den_level)
+    } else {
+      get(denominator)
+    }
+  )
+  r   <- survey::svyratio(
+    ~.num, ~.den, design = svy_tmp, na.rm = na_rm
+  )
+  est <- as.numeric(coef(r))
+  se  <- as.numeric(survey::SE(r))
+  tibble::tibble(
+    estimate = est,
+    se       = se,
+    cv       = ifelse(
+      abs(est) < .Machine$double.eps, NA_real_, se / est
+    ),
+    deff     = NA_real_
+  )
+}
+
+.compute_quantile <- function(svy, variable, probs, na_rm) {
+  q <- survey::svyquantile(
+    stats::as.formula(paste0("~", variable)),
+    design    = svy,
+    quantiles = probs,
+    na.rm     = na_rm,
+    ci        = TRUE
+  )
+  qdf <- as.data.frame(q[[1]])
+  tibble::tibble(
+    quantile = probs,
+    estimate = qdf[, "quantile"],
+    se       = qdf[, "se"],
+    cv       = ifelse(
+      abs(qdf[, "quantile"]) < .Machine$double.eps,
+      NA_real_, qdf[, "se"] / qdf[, "quantile"]
+    ),
+    deff     = NA_real_
+  )
+}
+
+.est_over_domains <- function(design, by, compute_fn) {
+  keys <- .survey_domain_keys(design$variables, by)
+  if (is.null(keys)) return(compute_fn(design))
+  purrr::map_dfr(seq_len(nrow(keys)), function(i) {
+    row <- keys[i, , drop = FALSE]
+    dplyr::bind_cols(
+      row,
+      compute_fn(.survey_subset_by_row(design, by, row))
+    )
+  })
+}
+
+.add_ci_and_label <- function(res, z, estimator, variable) {
+  res %>%
+    dplyr::mutate(
+      lci       = estimate - z * se,
+      uci       = estimate + z * se,
+      estimator = estimator,
+      variable  = variable
+    )
+}
+
+.add_quality_label <- function(res) {
+  dplyr::relocate(res, variable, estimator) %>%
+    dplyr::mutate(
+      quality = dplyr::case_when(
+        is.na(cv) ~ NA_character_,
+        cv < 0.05 ~ "Very high precision",
+        cv < 0.10 ~ "High precision",
+        cv < 0.20 ~ "Acceptable precision",
+        cv < 0.30 ~ "Use with caution",
+        TRUE      ~ "Low precision"
+      )
+    )
+}
+
+
 #' Estimate survey statistics under complex sampling designs
 #'
 #' Computes design-based point estimates and their associated uncertainty
@@ -355,11 +530,8 @@
 #' Heeringa, S. G., West, B. T. & Berglund, P. A. (2017).
 #' \emph{Applied Survey Data Analysis} (2nd ed.). CRC Press.
 #' \doi{10.1201/9781315153278}
-#'
+
 #' @export
-
-
-
 estimate_survey <- function(
     design,
     variable = NULL,
@@ -373,322 +545,127 @@ estimate_survey <- function(
     ratio_den_level = NULL,
     probs = c(0.25, 0.5, 0.75)
 ) {
-  
   estimator <- match.arg(estimator)
-  
+
   if (!inherits(design, "tbl_svy")) {
     rlang::abort("`design` must be a tbl_svy object.")
   }
-  
+
   vars <- names(design$variables)
-  
+
   if (!is.null(by)) {
     if (!is.character(by)) {
       rlang::abort("`by` must be a character vector.")
     }
     missing_by <- setdiff(by, vars)
     if (length(missing_by) > 0) {
-      rlang::abort(
-        paste("Grouping variables not found:", paste(missing_by, collapse = ", "))
-      )
+      rlang::abort(paste(
+        "Grouping variables not found:",
+        paste(missing_by, collapse = ", ")
+      ))
     }
   }
-  
-  alpha <- 1 - conf_level
-  z <- stats::qnorm(1 - alpha / 2)
-  
-  # ----------------------------------------------------------
-  # Helpers
-  # ----------------------------------------------------------
-  
-  domain_keys <- function(df, by) {
-    if (is.null(by) || length(by) == 0) return(NULL)
-    dplyr::distinct(df, dplyr::across(dplyr::all_of(by)))
-  }
-  
-  subset_design_by_row <- function(svy, by, row) {
-    if (is.null(by) || length(by) == 0) return(svy)
-    
-    conds <- lapply(by, function(v) {
-      call("==", as.name(v), row[[v]][[1]])
-    })
-    cond <- Reduce(function(a, b) call("&", a, b), conds)
-    
-    subset(svy, eval(cond, svy$variables, parent.frame()))
-  }
-  
-  # ==========================================================
-  # MEAN / TOTAL / PROP
-  # ==========================================================
-  
+
+  z <- stats::qnorm(1 - (1 - conf_level) / 2)
+
+  # ---- Mean / Total / Proportion ------------------------------------
   if (estimator %in% c("mean", "total", "prop")) {
-    
-    if (!is.character(variable) || length(variable) != 1 || !variable %in% vars) {
+
+    if (!is.character(variable) || length(variable) != 1 ||
+        !variable %in% vars) {
       rlang::abort("`variable` must be a single valid variable name.")
     }
-    
+
     var_sym  <- rlang::sym(variable)
     var_data <- design$variables[[variable]]
-    
-    design_grp <- design
-    if (!is.null(by) && length(by) > 0) {
-      design_grp <- design_grp %>%
+
+    design_grp <- if (!is.null(by) && length(by) > 0) {
+      design %>%
         srvyr::group_by(dplyr::across(dplyr::all_of(by)))
-    }
-    
-    if (estimator == "mean") {
-      
-      if (!is.numeric(var_data)) {
-        rlang::abort("Mean requires numeric variable.")
-      }
-      
-      res <- design_grp %>%
-        srvyr::summarise(
-          estimate = srvyr::survey_mean(
-            !!var_sym, vartype = c("se", "cv"), na.rm = na_rm, deff = TRUE
-          )
-        )
-      
-    } else if (estimator == "total") {
-      
-      if (!is.numeric(var_data)) {
-        rlang::abort("Total requires numeric variable.")
-      }
-      
-      res <- design_grp %>%
-        srvyr::summarise(
-          estimate = srvyr::survey_total(
-            !!var_sym, vartype = c("se", "cv"), na.rm = na_rm, deff = TRUE
-          )
-        )
-      
     } else {
-
-      uniq <- unique(stats::na.omit(var_data))
-      is_binary <- is.logical(var_data) ||
-        (is.numeric(var_data) && all(uniq %in% c(0, 1)))
-
-      if (is_binary) {
-
-        res <- design_grp %>%
-          srvyr::summarise(
-            estimate = srvyr::survey_mean(
-              !!var_sym, vartype = c("se", "cv"), na.rm = na_rm, deff = TRUE
-            )
-          )
-
-      } else {
-
-        levs <- levels(as.factor(var_data))
-
-        res <- purrr::map_dfr(levs, function(lv) {
-
-          tmp <- design_grp %>%
-            dplyr::mutate(.ind = (!!var_sym) == lv) %>%
-            srvyr::summarise(
-              estimate = srvyr::survey_mean(
-                .ind, vartype = c("se", "cv"), na.rm = na_rm, deff = TRUE
-              )
-            )
-
-          tmp[[variable]] <- lv
-          tmp
-        })
-      }
+      design
     }
-    
+
+    if (estimator %in% c("mean", "total")) {
+      if (!is.numeric(var_data)) {
+        rlang::abort(paste(estimator, "requires numeric variable."))
+      }
+      res <- .est_mean_or_total(design_grp, var_sym, estimator, na_rm)
+    } else {
+      res <- .est_prop(design_grp, var_sym, variable, var_data, na_rm)
+    }
+
     res <- res %>%
-      dplyr::rename(se = estimate_se, cv = estimate_cv, 
-                    deff = estimate_deff) %>%
-      dplyr::mutate(
-        lci = estimate - z * se,
-        uci = estimate + z * se,
-        estimator = estimator,
-        variable = variable
+      dplyr::rename(
+        se   = estimate_se,
+        cv   = estimate_cv,
+        deff = estimate_deff
       )
-    
-    # ==========================================================
-    # RATIO
-    # ==========================================================
-    
+    res <- .add_ci_and_label(res, z, estimator, variable)
+
+  # ---- Ratio --------------------------------------------------------
   } else if (estimator == "ratio") {
-    
+
     if (is.null(numerator) || is.null(denominator)) {
       rlang::abort("Both numerator and denominator must be provided.")
     }
-    
     if (!numerator %in% vars || !denominator %in% vars) {
       rlang::abort("Numerator or denominator not found in data.")
     }
-    
-    num_data <- design$variables[[numerator]]
-    den_data <- design$variables[[denominator]]
-    
+
+    num_data   <- design$variables[[numerator]]
+    den_data   <- design$variables[[denominator]]
     num_is_num <- is.numeric(num_data)
     den_is_num <- is.numeric(den_data)
     num_is_cat <- is.factor(num_data) || is.character(num_data)
     den_is_cat <- is.factor(den_data) || is.character(den_data)
-    
+
     if (num_is_num && den_is_num) {
-      
       if (numerator == denominator) {
         rlang::abort("Continuous ratios require different variables.")
       }
-      
-      compute_ratio <- function(svy) {
-        
-        r <- survey::svyratio(
-          stats::as.formula(paste0("~", numerator)),
-          stats::as.formula(paste0("~", denominator)),
-          design = svy,
-          na.rm  = na_rm
-        )
-        
-        est <- as.numeric(coef(r))
-        se  <- as.numeric(survey::SE(r))
-        
-        tibble::tibble(
-          estimate = est,
-          se       = se,
-          cv       = ifelse(abs(est) < .Machine$double.eps, NA_real_, se / est),
-          deff = NA_real_
-        )
+      compute_fn <- function(svy) {
+        .compute_ratio_numeric(svy, numerator, denominator, na_rm)
       }
-      
     } else {
-      
       if (num_is_cat && is.null(ratio_num_level)) {
         rlang::abort("Category for numerator must be specified.")
       }
       if (den_is_cat && is.null(ratio_den_level)) {
         rlang::abort("Category for denominator must be specified.")
       }
-      
-      compute_ratio <- function(svy) {
-        
-        svy_tmp <-stats::update(
-          svy,
-          .num = if (num_is_cat) {
-            as.numeric(get(numerator) == ratio_num_level)
-          } else {
-            get(numerator)
-          },
-          .den = if (den_is_cat) {
-            as.numeric(get(denominator) == ratio_den_level)
-          } else {
-            get(denominator)
-          }
-        )
-      
-        r <- survey::svyratio(~.num, ~.den, design = svy_tmp, na.rm = na_rm)
-        
-        est <- as.numeric(coef(r))
-        se  <- as.numeric(survey::SE(r))
-        
-        tibble::tibble(
-          estimate = est,
-          se       = se,
-          cv       = ifelse(abs(est) < .Machine$double.eps, NA_real_, se / est),
-          deff = NA_real_
+      compute_fn <- function(svy) {
+        .compute_ratio_categorical(
+          svy, numerator, denominator,
+          ratio_num_level, ratio_den_level,
+          num_is_cat, den_is_cat, na_rm
         )
       }
     }
-    
-    keys <- domain_keys(design$variables, by)
-    
-    if (is.null(keys)) {
-      res <- compute_ratio(design)
-    } else {
-      res <- purrr::map_dfr(seq_len(nrow(keys)), function(i) {
-        row <- keys[i, , drop = FALSE]
-        dplyr::bind_cols(
-          row,
-          compute_ratio(subset_design_by_row(design, by, row))
-        )
-      })
-    }
-    
-    res <- res %>%
-      dplyr::mutate(
-        lci = estimate - z * se,
-        uci = estimate + z * se,
-        estimator = "ratio",
-        variable = paste0(numerator, "_over_", denominator)
-      )
-    
-    # ==========================================================
-    # QUANTILE
-    # ==========================================================
-    
+
+    res <- .est_over_domains(design, by, compute_fn)
+    res <- .add_ci_and_label(
+      res, z, "ratio", paste0(numerator, "_over_", denominator)
+    )
+
+  # ---- Quantile -----------------------------------------------------
   } else {
-    
-    if (!is.character(variable) || length(variable) != 1 || !variable %in% vars) {
+
+    if (!is.character(variable) || length(variable) != 1 ||
+        !variable %in% vars) {
       rlang::abort("`variable` must be valid for quantiles.")
     }
-    
     probs <- sort(unique(probs))
     if (any(probs <= 0 | probs >= 1)) {
       rlang::abort("`probs` must be strictly between 0 and 1.")
     }
-    
-    keys <- domain_keys(design$variables, by)
-    
-    compute_quantile <- function(svy) {
-      q <- survey::svyquantile(
-        stats::as.formula(paste0("~", variable)),
-        design = svy,
-        quantiles = probs,
-        na.rm = na_rm,
-        ci = TRUE
-      )
-      qdf <- as.data.frame(q[[1]])
-      
-      tibble::tibble(
-        quantile = probs,
-        estimate = qdf[, "quantile"],
-        se       = qdf[, "se"],
-        cv       = ifelse(
-          abs(qdf[, "quantile"]) < .Machine$double.eps,
-          NA_real_,
-          qdf[, "se"] / qdf[, "quantile"]
-        ),
-        deff = NA_real_
-      )
+
+    compute_fn <- function(svy) {
+      .compute_quantile(svy, variable, probs, na_rm)
     }
-    
-    if (is.null(keys)) {
-      res <- compute_quantile(design)
-    } else {
-      res <- purrr::map_dfr(seq_len(nrow(keys)), function(i) {
-        row <- keys[i, , drop = FALSE]
-        dplyr::bind_cols(
-          row,
-          compute_quantile(subset_design_by_row(design, by, row))
-        )
-      })
-    }
-    
-    res <- res %>%
-      dplyr::mutate(
-        lci = estimate - z * se,
-        uci = estimate + z * se,
-        estimator = "quantile",
-        variable = variable
-      )
+    res <- .est_over_domains(design, by, compute_fn)
+    res <- .add_ci_and_label(res, z, "quantile", variable)
   }
-  
-  dplyr::relocate(res, variable, estimator) %>%
-    dplyr::mutate(
-      quality = dplyr::case_when(
-        is.na(cv)  ~ NA_character_,
-        cv < 0.05  ~ "Very high precision",
-        cv < 0.10  ~ "High precision",
-        cv < 0.20  ~ "Acceptable precision",
-        cv < 0.30  ~ "Use with caution",
-        TRUE       ~ "Low precision"
-      )
-    )
+
+  .add_quality_label(res)
 }
-
-
-

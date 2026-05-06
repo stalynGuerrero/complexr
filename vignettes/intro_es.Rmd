@@ -1,24 +1,17 @@
-﻿---
+---
 title: "complexr: Análisis de Datos de Encuestas Complejas"
 author: "Stalyn Guerrero Gómez"
-date: today
-lang: es
-format:
-  html:
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
     toc: true
-    toc-depth: 3
-    toc-title: "Contenido"
-    number-sections: true
-    code-fold: false
-    code-tools: true
-    theme: flatly
-    highlight-style: github
-    df-print: kable
-    fig-width: 8
-    fig-height: 5
+    toc_depth: 3
+    number_sections: true
+    fig_width: 8
+    fig_height: 5
 vignette: >
   %\VignetteIndexEntry{complexr: Análisis de Datos de Encuestas Complejas}
-  %\VignetteEngine{quarto::html}
+  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 bibliography: references.bib
 ---
@@ -305,13 +298,11 @@ La función valida que los pesos $w_k$ sean estrictamente positivos
 ($w_k > 0$) y sin valores faltantes, y opcionalmente verifica que las
 UPMs no se compartan entre estratos (`check_psu = TRUE`).
 
-:::{.callout-note}
-Cuando un estrato $h$ contiene una única UPM ($\alpha_h = 1$), la
-estimación de $\hat{V}_p$ por linealización de Taylor no está definida.
-La función establece automáticamente
-`options(survey.lonely.psu = "adjust")` para usar la aproximación
-conservadora centrada en la media del estrato [@cochran1977].
-:::
+> **Nota:** Cuando un estrato $h$ contiene una única UPM ($\alpha_h = 1$), la
+> estimación de $\hat{V}_p$ por linealización de Taylor no está definida.
+> La función establece automáticamente
+> `options(survey.lonely.psu = "adjust")` para usar la aproximación
+> conservadora centrada en la media del estrato [@cochran1977].
 
 ### Diagnóstico del diseño
 
@@ -703,13 +694,13 @@ columna que no forme parte de las columnas de salida estándar.
 
 ```{r}
 #| label: grafico-region
-#| fig-cap: "Ingreso per cápita por región — $\\bar{y}_{w,d}$ con IC 95%"
+#| fig.cap: "Ingreso per cápita por región — $\\bar{y}_{w,d}$ con IC 95%"
 plot_results_bar(r_region)
 ```
 
 ```{r}
 #| label: grafico-multi
-#| fig-cap: "Ingreso per cápita por región y área — $\\bar{y}_{w,d}$ con IC 95%"
+#| fig.cap: "Ingreso per cápita por región y área — $\\bar{y}_{w,d}$ con IC 95%"
 plot_results_bar(r_region_area)
 ```
 
@@ -718,7 +709,7 @@ $[0, 1]$:
 
 ```{r}
 #| label: grafico-prop
-#| fig-cap: "Tasa de pobreza por región — $\\hat{p}_d$ con IC 95%"
+#| fig.cap: "Tasa de pobreza por región — $\\hat{p}_d$ con IC 95%"
 plot_results_bar(r_pobre_region)
 ```
 
@@ -753,9 +744,6 @@ ComplexSurvey_app()
 
 ```{r}
 #| label: workflow
-#| code-fold: true
-#| code-summary: "Mostrar flujo de trabajo completo"
-
 library(complexr)
 
 # 1. Generar / cargar datos
@@ -770,7 +758,6 @@ data <- mutate_survey_data(
 )
 
 # 3. Construir diseño muestral (estratificado multietápico)
-#    weight = w_k, strata = h, cluster = alpha
 design <- as_survey_design_tbl(
   data    = data,
   weight  = "weight",
@@ -779,7 +766,7 @@ design <- as_survey_design_tbl(
   nest    = TRUE
 )
 
-# 4. Diagnosticar el diseño: N_hat, H, PSUs, CV(w)
+# 4. Diagnosticar el diseño
 describe_survey_design(design)
 
 # 5. Estimar media por dominio y formatear
@@ -799,13 +786,9 @@ format_results_table(res, digits = 2)
 
 ```{r}
 #| label: sesion
-#| code-fold: true
 sessionInfo()
 ```
 
 ---
 
 ## Referencias {.unnumbered}
-
-::: {#refs}
-:::

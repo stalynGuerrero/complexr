@@ -7,16 +7,36 @@ mod_diseno_server <- function(id, data, dict) {
     # -------------------------------------------------
     # 0. Static labels
     # -------------------------------------------------
-    output$title             <- shiny::renderText({ i18n_t(dict(), "mod_diseno.title") })
-    output$subtitle          <- shiny::renderText({ i18n_t(dict(), "mod_diseno.subtitle") })
-    output$params_card       <- shiny::renderText({ i18n_t(dict(), "mod_diseno.params_card") })
-    output$build_btn         <- shiny::renderText({ i18n_t(dict(), "mod_diseno.build_btn") })
-    output$results_card      <- shiny::renderText({ i18n_t(dict(), "mod_diseno.results_card") })
-    output$design_summary    <- shiny::renderText({ i18n_t(dict(), "mod_diseno.design_summary") })
-    output$r_code            <- shiny::renderText({ i18n_t(dict(), "mod_diseno.r_code") })
-    output$diagnostic        <- shiny::renderText({ i18n_t(dict(), "mod_diseno.diagnostic") })
-    output$lbl_tab_config    <- shiny::renderText({ i18n_t(dict(), "mod_diseno.tab_config") })
-    output$lbl_tab_variables <- shiny::renderText({ i18n_t(dict(), "mod_diseno.tab_variables") })
+    output$title <- shiny::renderText({
+      i18n_t(dict(), "mod_diseno.title")
+    })
+    output$subtitle <- shiny::renderText({
+      i18n_t(dict(), "mod_diseno.subtitle")
+    })
+    output$params_card <- shiny::renderText({
+      i18n_t(dict(), "mod_diseno.params_card")
+    })
+    output$build_btn <- shiny::renderText({
+      i18n_t(dict(), "mod_diseno.build_btn")
+    })
+    output$results_card <- shiny::renderText({
+      i18n_t(dict(), "mod_diseno.results_card")
+    })
+    output$design_summary <- shiny::renderText({
+      i18n_t(dict(), "mod_diseno.design_summary")
+    })
+    output$r_code <- shiny::renderText({
+      i18n_t(dict(), "mod_diseno.r_code")
+    })
+    output$diagnostic <- shiny::renderText({
+      i18n_t(dict(), "mod_diseno.diagnostic")
+    })
+    output$lbl_tab_config <- shiny::renderText({
+      i18n_t(dict(), "mod_diseno.tab_config")
+    })
+    output$lbl_tab_variables <- shiny::renderText({
+      i18n_t(dict(), "mod_diseno.tab_variables")
+    })
 
     # -------------------------------------------------
     # 0b. Update selectInput choices when language changes
@@ -50,14 +70,28 @@ mod_diseno_server <- function(id, data, dict) {
           shiny::h5(i18n_t(d, "mod_diseno.theory.srs.title")),
           shiny::p(i18n_t(d, "mod_diseno.theory.srs.desc")),
           shiny::h6(i18n_t(d, "mod_diseno.theory.srs.estimator_h")),
-          shiny::HTML("$$ \\hat{\\bar{Y}} = \\frac{1}{n} \\sum_{i=1}^{n} y_i $$"),
+          shiny::HTML(paste0(
+            "$$ \\hat{\\bar{Y}} = ",
+            "\\frac{1}{n} \\sum_{i=1}^{n} y_i $$"
+          )),
           shiny::h6(i18n_t(d, "mod_diseno.theory.srs.variance_h")),
-          shiny::HTML("$$ Var(\\hat{\\bar{Y}}) = \\left(1-\\frac{n}{N}\\right)\\frac{S^2}{n} $$"),
+          shiny::HTML(paste0(
+            "$$ Var(\\hat{\\bar{Y}}) = ",
+            "\\left(1-\\frac{n}{N}\\right)\\frac{S^2}{n} $$"
+          )),
           shiny::tags$ul(
-            shiny::tags$li(shiny::HTML(i18n_t(d, "mod_diseno.theory.srs.yi_desc"))),
-            shiny::tags$li(shiny::HTML(i18n_t(d, "mod_diseno.theory.srs.n_desc"))),
-            shiny::tags$li(shiny::HTML(i18n_t(d, "mod_diseno.theory.srs.N_desc"))),
-            shiny::tags$li(shiny::HTML(i18n_t(d, "mod_diseno.theory.srs.S2_desc")))
+            shiny::tags$li(
+              shiny::HTML(i18n_t(d, "mod_diseno.theory.srs.yi_desc"))
+            ),
+            shiny::tags$li(
+              shiny::HTML(i18n_t(d, "mod_diseno.theory.srs.n_desc"))
+            ),
+            shiny::tags$li(
+              shiny::HTML(i18n_t(d, "mod_diseno.theory.srs.N_desc"))
+            ),
+            shiny::tags$li(
+              shiny::HTML(i18n_t(d, "mod_diseno.theory.srs.S2_desc"))
+            )
           )
         ),
 
@@ -66,14 +100,30 @@ mod_diseno_server <- function(id, data, dict) {
           shiny::h5(i18n_t(d, "mod_diseno.theory.stratified.title")),
           shiny::p(i18n_t(d, "mod_diseno.theory.stratified.desc")),
           shiny::h6(i18n_t(d, "mod_diseno.theory.stratified.estimator_h")),
-          shiny::HTML("$$ \\hat{\\bar{Y}}_{st} = \\sum_{h=1}^{H} W_h \\bar{y}_h $$"),
+          shiny::HTML(paste0(
+            "$$ \\hat{\\bar{Y}}_{st} = ",
+            "\\sum_{h=1}^{H} W_h \\bar{y}_h $$"
+          )),
           shiny::h6(i18n_t(d, "mod_diseno.theory.stratified.variance_h")),
-          shiny::HTML("$$ Var(\\hat{\\bar{Y}}_{st}) = \\sum_{h=1}^{H} W_h^2 \\left(1-\\frac{n_h}{N_h}\\right) \\frac{S_h^2}{n_h} $$"),
+          shiny::HTML(paste0(
+            "$$ Var(\\hat{\\bar{Y}}_{st}) = ",
+            "\\sum_{h=1}^{H} W_h^2 ",
+            "\\left(1-\\frac{n_h}{N_h}\\right)",
+            " \\frac{S_h^2}{n_h} $$"
+          )),
           shiny::tags$ul(
-            shiny::tags$li(shiny::HTML(i18n_t(d, "mod_diseno.theory.stratified.H_desc"))),
-            shiny::tags$li(shiny::HTML(i18n_t(d, "mod_diseno.theory.stratified.Wh_desc"))),
-            shiny::tags$li(shiny::HTML(i18n_t(d, "mod_diseno.theory.stratified.nh_desc"))),
-            shiny::tags$li(shiny::HTML(i18n_t(d, "mod_diseno.theory.stratified.S2h_desc")))
+            shiny::tags$li(
+              shiny::HTML(i18n_t(d, "mod_diseno.theory.stratified.H_desc"))
+            ),
+            shiny::tags$li(
+              shiny::HTML(i18n_t(d, "mod_diseno.theory.stratified.Wh_desc"))
+            ),
+            shiny::tags$li(
+              shiny::HTML(i18n_t(d, "mod_diseno.theory.stratified.nh_desc"))
+            ),
+            shiny::tags$li(
+              shiny::HTML(i18n_t(d, "mod_diseno.theory.stratified.S2h_desc"))
+            )
           )
         ),
 
@@ -84,11 +134,23 @@ mod_diseno_server <- function(id, data, dict) {
           shiny::h6(i18n_t(d, "mod_diseno.theory.cluster.estimator_h")),
           shiny::HTML("$$ \\hat{Y} = \\sum_{i \\in s} \\frac{y_i}{\\pi_i} $$"),
           shiny::h6(i18n_t(d, "mod_diseno.theory.cluster.variance_h")),
-          shiny::HTML("$$ Var(\\hat{Y}) = \\sum_i \\sum_j \\left(\\frac{\\pi_{ij}-\\pi_i\\pi_j}{\\pi_{ij}}\\right) \\frac{y_i}{\\pi_i} \\frac{y_j}{\\pi_j} $$"),
+          shiny::HTML(paste0(
+            "$$ Var(\\hat{Y}) = \\sum_i \\sum_j ",
+            "\\left(",
+            "\\frac{\\pi_{ij}-\\pi_i\\pi_j}{\\pi_{ij}}",
+            "\\right)",
+            " \\frac{y_i}{\\pi_i} \\frac{y_j}{\\pi_j} $$"
+          )),
           shiny::tags$ul(
-            shiny::tags$li(shiny::HTML(i18n_t(d, "mod_diseno.theory.cluster.pi_desc"))),
-            shiny::tags$li(shiny::HTML(i18n_t(d, "mod_diseno.theory.cluster.piij_desc"))),
-            shiny::tags$li(shiny::HTML(i18n_t(d, "mod_diseno.theory.cluster.wi_desc")))
+            shiny::tags$li(
+              shiny::HTML(i18n_t(d, "mod_diseno.theory.cluster.pi_desc"))
+            ),
+            shiny::tags$li(
+              shiny::HTML(i18n_t(d, "mod_diseno.theory.cluster.piij_desc"))
+            ),
+            shiny::tags$li(
+              shiny::HTML(i18n_t(d, "mod_diseno.theory.cluster.wi_desc"))
+            )
           )
         )
       )
@@ -194,22 +256,27 @@ mod_diseno_server <- function(id, data, dict) {
 
         des <- if (input$design_type == "srs") {
 
-          formula_design <- paste0("svydesign(id=~1, weights=~", weight, ", data=data)")
+          formula_design <- paste0(
+            "svydesign(id=~1, weights=~",
+            weight, ", data=data)"
+          )
           as_survey_design_tbl(data = df, weight = weight)
 
         } else if (input$design_type == "stratified") {
 
           shiny::req(strata)
           formula_design <- paste0(
-            "svydesign(id=~1, strata=~", strata, ", weights=~", weight, ", data=data)"
+            "svydesign(id=~1, strata=~", strata,
+            ", weights=~", weight, ", data=data)"
           )
           as_survey_design_tbl(data = df, weight = weight, strata = strata)
 
         } else {
 
-          clusters <- sapply(
+          clusters <- vapply(
             seq_len(input$n_stages),
-            function(i) input[[paste0("cluster_stage_", i)]]
+            function(i) input[[paste0("cluster_stage_", i)]],
+            character(1)
           )
           lonely <- input$lonely_psu
           if (!is.null(lonely) && nchar(lonely) > 0) {

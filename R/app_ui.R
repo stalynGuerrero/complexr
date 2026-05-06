@@ -24,18 +24,32 @@ app_ui <- function() {
       # ============================================================
       header = shiny::tags$head(
         
-        shiny::tags$link(rel = "preconnect", href = "https://fonts.googleapis.com"),
         shiny::tags$link(
-          rel  = "stylesheet",
-          href = "https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=JetBrains+Mono:wght@400;500&display=swap"
+          rel  = "preconnect",
+          href = "https://fonts.googleapis.com"
         ),
         shiny::tags$link(
           rel  = "stylesheet",
-          href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+          href = paste0(
+            "https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800",
+            "&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500",
+            "&family=JetBrains+Mono:wght@400;500&display=swap"
+          )
+        ),
+        shiny::tags$link(
+          rel  = "stylesheet",
+          href = paste0(
+            "https://cdnjs.cloudflare.com/ajax/libs/",
+            "font-awesome/6.5.1/css/all.min.css"
+          )
         ),
         
         # Hojas de estilo del proyecto
-        shiny::tags$link(rel = "stylesheet", type = "text/css", href = "custom.css"),
+        shiny::tags$link(
+          rel  = "stylesheet",
+          type = "text/css",
+          href = "custom.css"
+        ),
         
         # Overrides de navbar para usar fuente Syne en la marca
         shiny::tags$style(shiny::HTML("
@@ -142,8 +156,10 @@ app_ui <- function() {
                     label   = shiny::tagList(
                       shiny::tags$i(class = "fa-solid fa-rocket"),
                       shiny::textOutput("cover_btn", inline = TRUE),
-                      shiny::tags$span(shiny::HTML("&thinsp;&rarr;"),
-                                       style = "font-weight:300; font-size:16px;")
+                      shiny::tags$span(
+                        shiny::HTML("&thinsp;&rarr;"),
+                        style = "font-weight:300; font-size:16px;"
+                      )
                     ),
                     class = "cover-btn cover-btn-primary"
                   ),
@@ -159,7 +175,10 @@ app_ui <- function() {
                 # Badges de tecnología
                 shiny::div(
                   class = "cover-badges",
-                  shiny::tags$span(class = "cover-badge", "CSV \u00b7 SAV \u00b7 DTA \u00b7 XLSX \u00b7 +"),
+                  shiny::tags$span(
+                    class = "cover-badge",
+                    "CSV \u00b7 SAV \u00b7 DTA \u00b7 XLSX \u00b7 +"
+                  ),
                   shiny::tags$span(class = "cover-badge", "survey"),
                   shiny::tags$span(class = "cover-badge", "i18n")
                 ),
@@ -194,7 +213,10 @@ app_ui <- function() {
                     shiny::div(class = "mock-dot dot-red"),
                     shiny::div(class = "mock-dot dot-amber"),
                     shiny::div(class = "mock-dot dot-green"),
-                    shiny::tags$span(class = "mock-title", "estimaciones_dominio.R")
+                    shiny::tags$span(
+                      class = "mock-title",
+                      "estimaciones_dominio.R"
+                    )
                   ),
                   
                   # KPIs
@@ -220,28 +242,100 @@ app_ui <- function() {
                   # Minigrafico de línea (sparkline simulado)
                   shiny::div(
                     class = "mock-sparkline",
-                    shiny::div(class = "mock-spark", style = "height:55%; background:rgba(0,159,219,0.18);"),
-                    shiny::div(class = "mock-spark", style = "height:70%; background:rgba(0,159,219,0.22);"),
-                    shiny::div(class = "mock-spark", style = "height:50%; background:rgba(0,159,219,0.18);"),
-                    shiny::div(class = "mock-spark", style = "height:80%; background:rgba(0,180,100,0.25);"),
-                    shiny::div(class = "mock-spark", style = "height:65%; background:rgba(0,180,100,0.20);"),
-                    shiny::div(class = "mock-spark", style = "height:90%; background:rgba(0,180,100,0.28);"),
-                    shiny::div(class = "mock-spark", style = "height:72%; background:rgba(0,159,219,0.22);")
+                    shiny::div(
+                      class = "mock-spark",
+                      style = paste0(
+                        "height:55%%; background:",
+                        "rgba(0,159,219,0.18)"
+                      )
+                    ),
+                    shiny::div(
+                      class = "mock-spark",
+                      style = paste0(
+                        "height:70%%; background:",
+                        "rgba(0,159,219,0.22)"
+                      )
+                    ),
+                    shiny::div(
+                      class = "mock-spark",
+                      style = paste0(
+                        "height:50%%; background:",
+                        "rgba(0,159,219,0.18)"
+                      )
+                    ),
+                    shiny::div(
+                      class = "mock-spark",
+                      style = paste0(
+                        "height:80%%; background:",
+                        "rgba(0,180,100,0.25)"
+                      )
+                    ),
+                    shiny::div(
+                      class = "mock-spark",
+                      style = paste0(
+                        "height:65%%; background:",
+                        "rgba(0,180,100,0.20)"
+                      )
+                    ),
+                    shiny::div(
+                      class = "mock-spark",
+                      style = paste0(
+                        "height:90%%; background:",
+                        "rgba(0,180,100,0.28)"
+                      )
+                    ),
+                    shiny::div(
+                      class = "mock-spark",
+                      style = paste0(
+                        "height:72%%; background:",
+                        "rgba(0,159,219,0.22)"
+                      )
+                    )
                   ),
                   
                   # Gráfico de barras animado
                   shiny::div(
                     class = "mock-chart",
-                    shiny::div(class = "mock-bar", style = "height:30%; animation-delay:0.08s;"),
-                    shiny::div(class = "mock-bar", style = "height:55%; animation-delay:0.16s;"),
-                    shiny::div(class = "mock-bar", style = "height:78%; animation-delay:0.24s;"),
-                    shiny::div(class = "mock-bar", style = "height:42%; animation-delay:0.32s;"),
-                    shiny::div(class = "mock-bar", style = "height:90%; animation-delay:0.40s;"),
-                    shiny::div(class = "mock-bar", style = "height:65%; animation-delay:0.48s;"),
-                    shiny::div(class = "mock-bar", style = "height:38%; animation-delay:0.56s;"),
-                    shiny::div(class = "mock-bar", style = "height:72%; animation-delay:0.64s;"),
-                    shiny::div(class = "mock-bar", style = "height:50%; animation-delay:0.72s;"),
-                    shiny::div(class = "mock-bar", style = "height:84%; animation-delay:0.80s;")
+                    shiny::div(
+                      class = "mock-bar",
+                      style = "height:30%; animation-delay:0.08s;"
+                    ),
+                    shiny::div(
+                      class = "mock-bar",
+                      style = "height:55%; animation-delay:0.16s;"
+                    ),
+                    shiny::div(
+                      class = "mock-bar",
+                      style = "height:78%; animation-delay:0.24s;"
+                    ),
+                    shiny::div(
+                      class = "mock-bar",
+                      style = "height:42%; animation-delay:0.32s;"
+                    ),
+                    shiny::div(
+                      class = "mock-bar",
+                      style = "height:90%; animation-delay:0.40s;"
+                    ),
+                    shiny::div(
+                      class = "mock-bar",
+                      style = "height:65%; animation-delay:0.48s;"
+                    ),
+                    shiny::div(
+                      class = "mock-bar",
+                      style = "height:38%; animation-delay:0.56s;"
+                    ),
+                    shiny::div(
+                      class = "mock-bar",
+                      style = "height:72%; animation-delay:0.64s;"
+                    ),
+                    shiny::div(
+                      class = "mock-bar",
+                      style = "height:50%; animation-delay:0.72s;"
+                    ),
+                    shiny::div(
+                      class = "mock-bar",
+                      style = "height:84%; animation-delay:0.80s;"
+                    )
                   ),
                   
                   # Etiquetas eje X
@@ -265,7 +359,10 @@ app_ui <- function() {
             # ── FEATURES ─────────────────────────────────────────
             shiny::div(
               class = "cover-features-section",
-              shiny::div(class = "cover-section-title", "Capacidades principales"),
+              shiny::div(
+                class = "cover-section-title",
+                "Capacidades principales"
+              ),
               shiny::tags$h2(
                 class = "cover-section-heading",
                 "Todo lo que necesitas para muestreo complejo"
@@ -282,8 +379,12 @@ app_ui <- function() {
                     class = "cover-feature-icon",
                     shiny::tags$i(class = "fa-solid fa-database")
                   ),
-                  shiny::tags$h3(shiny::textOutput("cover_feat1_title", inline = TRUE)),
-                  shiny::tags$p(shiny::textOutput("cover_feat1_desc", inline = TRUE))
+                  shiny::tags$h3(
+                    shiny::textOutput("cover_feat1_title", inline = TRUE)
+                  ),
+                  shiny::tags$p(
+                    shiny::textOutput("cover_feat1_desc", inline = TRUE)
+                  )
                 ),
                 
                 # Feature 2
@@ -294,8 +395,12 @@ app_ui <- function() {
                     class = "cover-feature-icon",
                     shiny::tags$i(class = "fa-solid fa-sitemap")
                   ),
-                  shiny::tags$h3(shiny::textOutput("cover_feat2_title", inline = TRUE)),
-                  shiny::tags$p(shiny::textOutput("cover_feat2_desc", inline = TRUE))
+                  shiny::tags$h3(
+                    shiny::textOutput("cover_feat2_title", inline = TRUE)
+                  ),
+                  shiny::tags$p(
+                    shiny::textOutput("cover_feat2_desc", inline = TRUE)
+                  )
                 ),
                 
                 # Feature 3
@@ -306,8 +411,12 @@ app_ui <- function() {
                     class = "cover-feature-icon",
                     shiny::tags$i(class = "fa-solid fa-chart-line")
                   ),
-                  shiny::tags$h3(shiny::textOutput("cover_feat3_title", inline = TRUE)),
-                  shiny::tags$p(shiny::textOutput("cover_feat3_desc", inline = TRUE))
+                  shiny::tags$h3(
+                    shiny::textOutput("cover_feat3_title", inline = TRUE)
+                  ),
+                  shiny::tags$p(
+                    shiny::textOutput("cover_feat3_desc", inline = TRUE)
+                  )
                 )
               )
             ),

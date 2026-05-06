@@ -1,24 +1,17 @@
-﻿---
+---
 title: "complexr: Analysis of Complex Survey Data"
 author: "Stalyn Guerrero Gómez"
-date: today
-lang: en
-format:
-  html:
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
     toc: true
-    toc-depth: 3
-    toc-title: "Contents"
-    number-sections: true
-    code-fold: false
-    code-tools: true
-    theme: flatly
-    highlight-style: github
-    df-print: kable
-    fig-width: 8
-    fig-height: 5
+    toc_depth: 3
+    number_sections: true
+    fig_width: 8
+    fig_height: 5
 vignette: >
   %\VignetteIndexEntry{complexr: Analysis of Complex Survey Data}
-  %\VignetteEngine{quarto::html}
+  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 bibliography: references.bib
 ---
@@ -299,12 +292,10 @@ The function validates that weights $w_k$ are strictly positive
 ($w_k > 0$) and free of missing values, and optionally checks that PSUs
 are not shared across strata (`check_psu = TRUE`).
 
-:::{.callout-note}
-When a stratum $h$ contains only one PSU ($\alpha_h = 1$), estimation
-of $\hat{V}_p$ by Taylor linearization is undefined. The function
-automatically sets `options(survey.lonely.psu = "adjust")` to use the
-conservative centered-at-stratum-mean approximation [@cochran1977].
-:::
+> **Note:** When a stratum $h$ contains only one PSU ($\alpha_h = 1$), estimation
+> of $\hat{V}_p$ by Taylor linearization is undefined. The function
+> automatically sets `options(survey.lonely.psu = "adjust")` to use the
+> conservative centered-at-stratum-mean approximation [@cochran1977].
 
 ### Diagnosing the Design
 
@@ -692,13 +683,13 @@ standard output columns.
 
 ```{r}
 #| label: plot-region
-#| fig-cap: "Per-capita income by region — $\\bar{y}_{w,d}$ with 95% CI"
+#| fig.cap: "Per-capita income by region — $\\bar{y}_{w,d}$ with 95% CI"
 plot_results_bar(r_region)
 ```
 
 ```{r}
 #| label: plot-multi
-#| fig-cap: "Per-capita income by region and area — $\\bar{y}_{w,d}$ with 95% CI"
+#| fig.cap: "Per-capita income by region and area, 95% CI"
 plot_results_bar(r_region_area)
 ```
 
@@ -706,7 +697,7 @@ Proportion plots automatically constrain the y-axis to $[0, 1]$:
 
 ```{r}
 #| label: plot-prop
-#| fig-cap: "Poverty rate by region — $\\hat{p}_d$ with 95% CI"
+#| fig.cap: "Poverty rate by region — $\\hat{p}_d$ with 95% CI"
 plot_results_bar(r_pobre_region)
 ```
 
@@ -739,9 +730,6 @@ ComplexSurvey_app()
 
 ```{r}
 #| label: workflow
-#| code-fold: true
-#| code-summary: "Show complete workflow"
-
 library(complexr)
 
 # 1. Generate / load data
@@ -756,7 +744,6 @@ data <- mutate_survey_data(
 )
 
 # 3. Build survey design (stratified multistage)
-#    weight = w_k, strata = h, cluster = alpha
 design <- as_survey_design_tbl(
   data    = data,
   weight  = "weight",
@@ -785,13 +772,9 @@ format_results_table(res, digits = 2)
 
 ```{r}
 #| label: session
-#| code-fold: true
 sessionInfo()
 ```
 
 ---
 
 ## References {.unnumbered}
-
-::: {#refs}
-:::

@@ -43,7 +43,9 @@ mod_variables_ui <- function(id) {
 
             shiny::textInput(
               ns("var_name"),
-              label       = shiny::textOutput(ns("lbl_var_name"), inline = TRUE),
+              label       = shiny::textOutput(
+                ns("lbl_var_name"), inline = TRUE
+              ),
               placeholder = "ej: ingreso_pc"
             ),
 
@@ -68,12 +70,15 @@ mod_variables_ui <- function(id) {
               "nueva_var <- expresion",
               style = paste(
                 "font-size:11px; display:block; margin-bottom:10px;",
-                "color:#002856; background:#E0F4FD; padding:4px 8px; border-radius:4px;"
+                "color:#002856; background:#E0F4FD;",
+                " padding:4px 8px; border-radius:4px;"
               )
             ),
             shiny::textAreaInput(
               ns("expert_code"),
-              label       = shiny::textOutput(ns("lbl_expert_label"), inline = TRUE),
+              label       = shiny::textOutput(
+                ns("lbl_expert_label"), inline = TRUE
+              ),
               rows        = 6,
               placeholder = paste0(
                 "ingreso_pc <- ingreso / miembros\n",

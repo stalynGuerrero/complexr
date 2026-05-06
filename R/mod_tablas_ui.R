@@ -5,8 +5,11 @@ mod_tablas_ui <- function(id) {
 
     # ---- Encabezado ----
     shiny::div(
-      style = "display:flex; align-items:flex-start; justify-content:space-between;
-               flex-wrap:wrap; gap:12px; margin-bottom:20px;",
+      style = paste0(
+        "display:flex; align-items:flex-start;",
+        " justify-content:space-between;",
+        " flex-wrap:wrap; gap:12px; margin-bottom:20px;"
+      ),
 
       shiny::tags$div(
         class = "page-header page-header--tablas",
@@ -16,7 +19,10 @@ mod_tablas_ui <- function(id) {
           shiny::tags$i(class = "fa fa-folder-open")
         ),
         shiny::tags$div(
-          shiny::h3(shiny::textOutput(ns("title"), inline = TRUE), class = "page-title"),
+          shiny::h3(
+            shiny::textOutput(ns("title"), inline = TRUE),
+            class = "page-title"
+          ),
           shiny::tags$p(
             shiny::textOutput(ns("subtitle"), inline = TRUE),
             class = "page-subtitle"

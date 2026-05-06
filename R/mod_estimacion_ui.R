@@ -3,7 +3,7 @@ mod_estimacion_ui <- function(id) {
 
   shiny::fluidPage(
 
-    # ── Encabezado ────────────────────────────────────────────────
+    # -- Encabezado ----------------------------------------------------
     shiny::tags$div(
       class = "page-header page-header--estimacion",
       shiny::tags$div(
@@ -21,7 +21,7 @@ mod_estimacion_ui <- function(id) {
 
     shiny::fluidRow(
 
-      # ── Columna izquierda: parámetros ────────────────────────────
+      # -- Columna izquierda: parametros ----------------------------
       shiny::column(
         3,
         shiny::wellPanel(
@@ -38,21 +38,25 @@ mod_estimacion_ui <- function(id) {
 
             shiny::selectInput(
               inputId = ns("estimator"),
-              label   = "Tipo de estimación",
+              label   = "Tipo de estimaci\u00f3n",
               choices = c(
                 "Media"        = "mean",
                 "Total"        = "total",
-                "Proporción" = "prop",
-                "Razón"      = "ratio",
+                "Proporci\u00f3n" = "prop",
+                "Raz\u00f3n"      = "ratio",
                 "Cuantiles"    = "quantile"
               )
             ),
 
-            # Razón
+            # Razon
             shiny::conditionalPanel(
               condition = sprintf("input['%s'] == 'ratio'", ns("estimator")),
-              shiny::selectInput(ns("numerator"),   "Numerador",   choices = NULL),
-              shiny::selectInput(ns("denominator"), "Denominador", choices = NULL),
+              shiny::selectInput(
+                ns("numerator"), "Numerador", choices = NULL
+              ),
+              shiny::selectInput(
+                ns("denominator"), "Denominador", choices = NULL
+              ),
               shiny::uiOutput(ns("ratio_levels_ui"))
             ),
 
@@ -66,12 +70,12 @@ mod_estimacion_ui <- function(id) {
               )
             ),
 
-            # Variable de interés
+            # Variable de interes
             shiny::conditionalPanel(
               condition = sprintf("input['%s'] != 'ratio'", ns("estimator")),
               shiny::selectInput(
                 ns("y_var"),
-                label   = "Variable de interés",
+                label   = "Variable de inter\u00e9s",
                 choices = NULL
               )
             ),
@@ -99,12 +103,12 @@ mod_estimacion_ui <- function(id) {
         )
       ),
 
-      # ── Columna derecha: resultados ──────────────────────────────
+      # -- Columna derecha: resultados ----------------------------
       shiny::column(
         9,
         shiny::wellPanel(
 
-          # Marco teórico
+          # Marco teorico
           shiny::tags$div(
             class = "card-header-block card-header-block--estimacion",
             shiny::tags$i(class = "fa fa-book"),

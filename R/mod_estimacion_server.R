@@ -22,7 +22,8 @@ where:
 <li>\\(y_i\\) is the variable of interest</li>
 </ul>
 
-This estimator can be interpreted as the Horvitz-Thompson total estimator divided by the estimated population size.
+This estimator can be interpreted as the Horvitz-Thompson
+total estimator divided by the estimated population size.
 
 $$
 \\hat{\\bar{Y}} = \\frac{\\hat{T}_Y}{\\hat{N}}
@@ -67,7 +68,8 @@ donde:
 <li>\\(y_i\\) es la variable de inter\u00e9s</li>
 </ul>
 
-Este estimador puede interpretarse como el estimador de Horvitz-Thompson del total dividido por el tama\u00f1o poblacional estimado.
+Este estimador puede interpretarse como el estimador de
+Horvitz-Thompson del total dividido por el tama\u00f1o poblacional estimado.
 
 $$
 \\hat{\\bar{Y}} = \\frac{\\hat{T}_Y}{\\hat{N}}
@@ -91,7 +93,8 @@ $$
 \\widehat{Var}\\left(\\sum w_i y_i\\right)
 $$
 
-La varianza se estima mediante linearizaci\u00f3n de Taylor o m\u00e9todos de replicaci\u00f3n.
+La varianza se estima mediante linearizaci\u00f3n de Taylor o
+m\u00e9todos de replicaci\u00f3n.
 "
   }
 }
@@ -252,7 +255,8 @@ $$
 
 <b>Approximate variance</b>
 
-The estimator is nonlinear, so its variance is approximated via Taylor linearization:
+The estimator is nonlinear, so its variance is approximated
+via Taylor linearization:
 
 $$
 \\widehat{Var}(\\hat{R}) \\approx
@@ -427,7 +431,8 @@ act\u00faa como variable auxiliar reduciendo la varianza del estimador.
   if (lang == "en") {
 "<b>Weighted quantiles</b><br><br>
 
-Population quantiles are defined from the weighted cumulative distribution function:
+Population quantiles are defined from the weighted cumulative
+distribution function:
 
 $$
 F_w(y) =
@@ -440,7 +445,8 @@ $$
 F_w(q_p) = p
 $$
 
-Weighted quantiles allow estimating percentiles of the population distribution under complex designs.
+Weighted quantiles allow estimating percentiles of the population
+distribution under complex designs.
 
 Variance is usually estimated via:
 
@@ -452,7 +458,8 @@ Variance is usually estimated via:
   } else {
 "<b>Cuantiles ponderados</b><br><br>
 
-Los cuantiles poblacionales se definen a partir de la funci\u00f3n de distribuci\u00f3n acumulada ponderada:
+Los cuantiles poblacionales se definen a partir de la
+funci\u00f3n de distribuci\u00f3n acumulada ponderada:
 
 $$
 F_w(y) =
@@ -465,7 +472,8 @@ $$
 F_w(q_p) = p
 $$
 
-Los cuantiles ponderados permiten estimar percentiles de la distribuci\u00f3n poblacional bajo dise\u00f1os complejos.
+Los cuantiles ponderados permiten estimar percentiles de la
+distribuci\u00f3n poblacional bajo dise\u00f1os complejos.
 
 La varianza suele estimarse mediante:
 
@@ -513,7 +521,8 @@ $$
 
 <b>Design Effect</b><br><br>
 
-The design effect measures how much the variance increases due to the complex sampling design compared to simple random sampling.
+The design effect measures how much the variance increases due
+to the complex sampling design compared to simple random sampling.
 
 $$
 DEFF =
@@ -534,9 +543,11 @@ $$
 <hr><b>References</b>
 <ul>
 <li>Cochran, W. (1977). <i>Sampling Techniques</i>. Wiley.</li>
-<li>S&auml;rndal, C., Swensson, B., &amp; Wretman, J. (1992). <i>Model Assisted Survey Sampling</i>. Springer.</li>
+<li>S&auml;rndal, C., Swensson, B., &amp; Wretman, J. (1992).
+<i>Model Assisted Survey Sampling</i>. Springer.</li>
 <li>Lohr, S. (2021). <i>Sampling: Design and Analysis</i>. CRC Press.</li>
-<li>Lumley, T. (2010). <i>Complex Surveys: A Guide to Analysis Using R</i>. Wiley.</li>
+<li>Lumley, T. (2010).
+<i>Complex Surveys: A Guide to Analysis Using R</i>. Wiley.</li>
 </ul>
 "
   } else {
@@ -574,7 +585,8 @@ $$
 
 <b>Efecto de dise\u00f1o (Design Effect)</b><br><br>
 
-El efecto de dise\u00f1o mide cu\u00e1nto aumenta la varianza debido al dise\u00f1o muestral complejo comparado con un muestreo aleatorio simple.
+El efecto de dise\u00f1o mide cu\u00e1nto aumenta la varianza debido
+al dise\u00f1o muestral complejo comparado con un muestreo aleatorio simple.
 
 $$
 DEFF =
@@ -595,9 +607,11 @@ $$
 <hr><b>Referencias</b>
 <ul>
 <li>Cochran, W. (1977). <i>Sampling Techniques</i>. Wiley.</li>
-<li>S&auml;rndal, C., Swensson, B., &amp; Wretman, J. (1992). <i>Model Assisted Survey Sampling</i>. Springer.</li>
+<li>S&auml;rndal, C., Swensson, B., &amp; Wretman, J. (1992).
+<i>Model Assisted Survey Sampling</i>. Springer.</li>
 <li>Lohr, S. (2021). <i>Sampling: Design and Analysis</i>. CRC Press.</li>
-<li>Lumley, T. (2010). <i>Complex Surveys: A Guide to Analysis Using R</i>. Wiley.</li>
+<li>Lumley, T. (2010).
+<i>Complex Surveys: A Guide to Analysis Using R</i>. Wiley.</li>
 </ul>
 "
   }
@@ -616,15 +630,33 @@ mod_estimacion_server <- function(id, design, dict) {
     # --------------------------------------------------
     # 0. Static labels
     # --------------------------------------------------
-    output$title        <- shiny::renderText({ i18n_t(dict(), "mod_estimacion.title") })
-    output$subtitle     <- shiny::renderText({ i18n_t(dict(), "mod_estimacion.subtitle") })
-    output$params_card  <- shiny::renderText({ i18n_t(dict(), "mod_estimacion.params_card") })
-    output$run_btn      <- shiny::renderText({ i18n_t(dict(), "mod_estimacion.run_btn") })
-    output$results_card <- shiny::renderText({ i18n_t(dict(), "mod_estimacion.results_card") })
-    output$theory_title <- shiny::renderText({ i18n_t(dict(), "mod_estimacion.theory_title") })
-    output$status_title <- shiny::renderText({ i18n_t(dict(), "mod_estimacion.status_title") })
-    output$result_title <- shiny::renderText({ i18n_t(dict(), "mod_estimacion.result_title") })
-    output$quality_title <- shiny::renderText({ i18n_t(dict(), "mod_estimacion.quality_title") })
+    output$title <- shiny::renderText({
+      i18n_t(dict(), "mod_estimacion.title")
+    })
+    output$subtitle <- shiny::renderText({
+      i18n_t(dict(), "mod_estimacion.subtitle")
+    })
+    output$params_card <- shiny::renderText({
+      i18n_t(dict(), "mod_estimacion.params_card")
+    })
+    output$run_btn <- shiny::renderText({
+      i18n_t(dict(), "mod_estimacion.run_btn")
+    })
+    output$results_card <- shiny::renderText({
+      i18n_t(dict(), "mod_estimacion.results_card")
+    })
+    output$theory_title <- shiny::renderText({
+      i18n_t(dict(), "mod_estimacion.theory_title")
+    })
+    output$status_title <- shiny::renderText({
+      i18n_t(dict(), "mod_estimacion.status_title")
+    })
+    output$result_title <- shiny::renderText({
+      i18n_t(dict(), "mod_estimacion.result_title")
+    })
+    output$quality_title <- shiny::renderText({
+      i18n_t(dict(), "mod_estimacion.quality_title")
+    })
 
     # --------------------------------------------------
     # 0b. Update input labels/choices when language changes
@@ -676,7 +708,10 @@ mod_estimacion_server <- function(id, design, dict) {
       shiny::tagList(
         shiny::withMathJax(),
         shiny::div(
-          style = "background-color:#f8f9fa; padding:20px; border-radius:10px; font-size:14px;",
+          style = paste0(
+            "background-color:#f8f9fa; padding:20px;",
+            " border-radius:10px; font-size:14px;"
+          ),
           shiny::HTML(theory_text)
         )
       )
@@ -695,7 +730,10 @@ mod_estimacion_server <- function(id, design, dict) {
       lang <- i18n_t(dict(), "lang")
       shiny::withMathJax(
         shiny::div(
-          style = "background:#f8f9fa; padding:20px; border-radius:10px; font-size:14px;",
+          style = paste0(
+            "background:#f8f9fa; padding:20px;",
+            " border-radius:10px; font-size:14px;"
+          ),
           shiny::HTML(.th_quality(lang))
         )
       )
@@ -735,7 +773,7 @@ mod_estimacion_server <- function(id, design, dict) {
       vars <- des$variables
 
       if (input$estimator %in% c("mean", "total", "quantile")) {
-        valid_vars <- names(vars)[sapply(vars, is.numeric)]
+        valid_vars <- names(vars)[vapply(vars, is.numeric, logical(1))]
       } else {
         valid_vars <- names(vars)
       }

@@ -39,7 +39,10 @@ mod_datos_server <- function(id, dict) {
         ),
         shiny::tags$small(
           shiny::textOutput(session$ns("file_hint"), inline = TRUE),
-          style = "color:#4A6572; display:block; margin-top:-10px; margin-bottom:8px;"
+          style = paste0(
+            "color:#4A6572; display:block;",
+            " margin-top:-10px; margin-bottom:8px;"
+          )
         )
       )
     })

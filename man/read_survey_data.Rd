@@ -15,13 +15,16 @@ read_survey_data(
 \arguments{
 \item{path}{Character. File path to the dataset.}
 
-\item{col_types}{Optional. Passed to \code{readr::read_csv()} / \code{read_tsv()}.}
+\item{col_types}{Optional. Passed to \code{readr::read_csv()} /
+\code{read_tsv()}.}
 
 \item{guess_max}{Integer. Maximum rows used for type guessing (CSV/TSV only).}
 
-\item{encoding}{Character. File encoding (CSV/TSV only). Default \code{"UTF-8"}.}
+\item{encoding}{Character. File encoding (CSV/TSV only).
+Default \code{"UTF-8"}.}
 
-\item{sheet}{Integer or character. Sheet to read for Excel files. Default \code{1}.}
+\item{sheet}{Integer or character. Sheet to read for Excel files.
+Default \code{1}.}
 }
 \value{
 A tibble with attributes:

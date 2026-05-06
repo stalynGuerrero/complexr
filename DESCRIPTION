@@ -14,7 +14,7 @@ Description:
     such as means, totals, and proportions with associated measures of uncertainty.
     It is designed as a reusable statistical backend that can be used programmatically
     or integrated into interactive applications built with Shiny.
-License: GPL (>= 3)
+License: GPL (>= 3) + file LICENSE
 URL: https://github.com/stalynGuerrero/complexr
 BugReports: https://github.com/stalynGuerrero/complexr/issues
 Encoding: UTF-8
@@ -47,8 +47,7 @@ Suggests:
     rmarkdown,
     quarto,
     printr,
-    rpivotTable,
     testthat (>= 3.0.0)
-VignetteBuilder: knitr, quarto
+VignetteBuilder: knitr
 Config/testthat/edition: 3
 Config/roxygen2/version: 8.0.0

@@ -5,10 +5,13 @@
 #' metadata as attributes, facilitating traceability and reproducibility.
 #'
 #' @param path Character. File path to the dataset.
-#' @param col_types Optional. Passed to \code{readr::read_csv()} / \code{read_tsv()}.
+#' @param col_types Optional. Passed to \code{readr::read_csv()} /
+#'   \code{read_tsv()}.
 #' @param guess_max Integer. Maximum rows used for type guessing (CSV/TSV only).
-#' @param encoding Character. File encoding (CSV/TSV only). Default \code{"UTF-8"}.
-#' @param sheet Integer or character. Sheet to read for Excel files. Default \code{1}.
+#' @param encoding Character. File encoding (CSV/TSV only).
+#'   Default \code{"UTF-8"}.
+#' @param sheet Integer or character. Sheet to read for Excel files.
+#'   Default \code{1}.
 #'
 #' @return A tibble with attributes:
 #' \itemize{
@@ -105,7 +108,8 @@ read_survey_data <- function(
     rlang::abort(
       message = paste0(
         "Unsupported file format: .", ext,
-        ". Supported: csv, tsv, txt, xlsx, xls, sav, por, dta, sas7bdat, xpt, rds."
+        ". Supported: csv, tsv, txt, xlsx, xls,",
+        " sav, por, dta, sas7bdat, xpt, rds."
       ),
       class = "shinycomplexsurvey_unsupported_format"
     )
@@ -115,7 +119,9 @@ read_survey_data <- function(
     data <- tibble::as_tibble(data)
   }
 
-  attr(data, "source_path")   <- normalizePath(path, winslash = "/", mustWork = FALSE)
+  attr(data, "source_path")   <- normalizePath(
+    path, winslash = "/", mustWork = FALSE
+  )
   attr(data, "source_format") <- ext
   attr(data, "n_rows")        <- nrow(data)
   attr(data, "n_cols")        <- ncol(data)

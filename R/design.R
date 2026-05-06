@@ -52,7 +52,8 @@
 #'   Simple random sampling (SRS) \tab \code{weight} only \cr
 #'   Stratified \tab \code{weight} + \code{strata} \cr
 #'   Single-stage cluster \tab \code{weight} + \code{cluster} \cr
-#'   Stratified multistage \tab \code{weight} + \code{strata} + \code{cluster} \cr
+#'   Stratified multistage \tab \code{weight} + \code{strata} +
+#'     \code{cluster} \cr
 #'   Any of the above with FPC \tab add \code{fpc} \cr
 #' }
 #'

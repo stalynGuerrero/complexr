@@ -4,7 +4,7 @@ mod_diseno_ui <- function(id) {
 
   shiny::fluidPage(
 
-    # Encabezado del módulo
+    # Encabezado del modulo
     shiny::div(
       style = "margin-bottom:16px;",
       shiny::h3(shiny::textOutput(ns("title"), inline = TRUE)),
@@ -13,7 +13,7 @@ mod_diseno_ui <- function(id) {
         style = "color:#4A6572; font-size:13px; margin-top:4px;"
       )
     ),
-    tags$style(HTML("
+    shiny::tags$style(shiny::HTML("
 /* Altura del dropdown */
 .selectize-dropdown {
   max-height: 300px !important;
@@ -24,7 +24,7 @@ mod_diseno_ui <- function(id) {
 .selectize-dropdown-content .option {
   padding: 10px 12px;
   line-height: 1.4;
-  white-space: normal;   /* permite salto de línea */
+  white-space: normal;   /* permite salto de linea */
 }
 
 /* Opcional: ancho completo del dropdown */
@@ -38,7 +38,7 @@ mod_diseno_ui <- function(id) {
       type = "tabs",
 
       # ============================================================
-      # Sub-pestaña 1: Configurar diseño
+      # Sub-pestana 1: Configurar diseno
       # ============================================================
       shiny::tabPanel(
         title = shiny::tagList(
@@ -106,7 +106,7 @@ mod_diseno_ui <- function(id) {
       ),
 
       # ============================================================
-      # Sub-pestaña 2: Crear variables
+      # Sub-pestana 2: Crear variables
       # ============================================================
       shiny::tabPanel(
         title = shiny::tagList(

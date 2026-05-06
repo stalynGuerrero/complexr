@@ -1,7 +1,8 @@
 #' Generate simulated complex survey data with hierarchical structure
 #'
 #' Generates a synthetic dataset representing a complex survey design with a
-#' three-level hierarchical structure: primary sampling units (PSUs), households,
+#' three-level hierarchical structure: primary sampling units (PSUs),
+#' households,
 #' and individuals. The function ensures internal consistency of weights,
 #' cluster sizes, and derived variables, making it suitable for testing survey
 #' estimators, calibration methods, and small area estimation workflows.
@@ -21,7 +22,8 @@
 #'         random number of households (between 5 and 15).
 #'   \item \strong{Households}: each household has a sampling weight and a
 #'         fixed area (urban/rural).
-#'   \item \strong{Individuals}: observations are generated at the individual level.
+#'   \item \strong{Individuals}: observations are generated at the
+#'         individual level.
 #' }
 #'
 #' \strong{Weights}
@@ -59,15 +61,18 @@
 #'
 #' \strong{Education and income correlation}
 #'
-#' Education is assigned at the individual level conditional on age. A household-level
-#' education effect is derived from the maximum education level within the household
+#' Education is assigned at the individual level conditional on age.
+#' A household-level
+#' education effect is derived from the maximum education level within the
+#' household
 #' and used to adjust household income:
 #'
 #' \deqn{
 #' Y_h^{*} = Y_h \cdot f(E_h)
 #' }
 #'
-#' where \eqn{f(E_h)} is a multiplicative factor depending on household education.
+#' where \eqn{f(E_h)} is a multiplicative factor depending on household
+#' education.
 #'
 #'
 #' \strong{Consistency constraints}
@@ -87,7 +92,8 @@
 #' The dataset includes:
 #'
 #' \itemize{
-#'   \item Design variables: \code{strata}, \code{upm}, \code{hogar_id}, \code{persona_id}, \code{weight}
+#'   \item Design variables: \code{strata}, \code{upm}, \code{hogar_id},
+#'         \code{persona_id}, \code{weight}
 #'   \item Domains: \code{region}, \code{sexo}, \code{area}
 #'   \item Demographics: \code{edad}, \code{educacion}, \code{empleo}
 #'   \item Welfare indicators: \code{ingreso_pc}, \code{gasto_pc}, \code{pobre}
@@ -95,7 +101,8 @@
 #' }
 #'
 #' @return
-#' A tibble at the individual level with hierarchical identifiers and survey variables.
+#' A tibble at the individual level with hierarchical identifiers and
+#' survey variables.
 #'
 #' @examples
 #' data <- generate_example_data(n_upm = 50)
