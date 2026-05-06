@@ -1,6 +1,6 @@
 # complexr <img src="inst/img/complexr_hex.png" align="right" width="120"/>
 
-![Version](https://img.shields.io/badge/version-0.0.0.9000-blue)
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
 ![R](https://img.shields.io/badge/R-%3E%3D%204.1.0-276DC3)
 ![License](https://img.shields.io/badge/license-GPL--3-green)
 ![Language](https://img.shields.io/badge/lang-ES%20%7C%20EN-orange)
