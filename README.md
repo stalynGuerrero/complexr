@@ -38,14 +38,6 @@ estructura del diseño muestral.
 - Generación automática del código R equivalente (`svydesign`).
 - Diagnóstico del diseño construido.
 
-#### Variables derivadas *(nuevo)*
-- Creación de nuevas variables sobre el diseño activo.
-- **Modo básico**: operaciones aritméticas, funciones matemáticas, indicadores
-  binarios, recodificaciones y cortes por intervalos.
-- **Modo experto**: expresiones R arbitrarias de múltiples líneas.
-- Previsualización del código generado antes de aplicar cambios.
-- Gestión de variables derivadas (eliminar individualmente o en bloque).
-
 #### Estimación
 - Estimadores disponibles: **media**, **total**, **proporción**, **razón** y
   **cuantiles**.
@@ -55,8 +47,26 @@ estructura del diseño muestral.
   de variación (CV).
 - Indicadores de calidad para evaluar la confiabilidad de las estimaciones.
 
-#### Tablas de resultados *(nuevo)*
-- Gestión centralizada de todas las estimaciones generadas en la sesión.
+#### Inferencia estadística *(nuevo)*
+- Cinco tipos de análisis con corrección por diseño muestral complejo:
+  - **Coeficiente de Gini** — desigualdad con curva de Lorenz ponderada, desglose
+    por dominio y estimación de varianza por linearización de Taylor (`convey`).
+  - **Correlación de Pearson** — correlación ponderada con intervalo de confianza
+    mediante transformación Z de Fisher.
+  - **Prueba de hipótesis** — contraste t de diferencia de medias entre dos grupos
+    (`svyttest`), con IC y grados de libertad basados en el diseño.
+  - **Tablas cruzadas** — tablas de proporciones y prueba chi-cuadrado con
+    corrección de Rao-Scott (estadísticos F, Chi² y Wald).
+  - **Contrastes lineales** — comparaciones múltiples por pares con corrección de
+    Bonferroni; editor interactivo de matrices de contraste personalizadas.
+- Marco teórico con formulación matemática (MathJax) para cada análisis.
+- Visualizaciones específicas: curva de Lorenz, diagrama de dispersión,
+  gráfico de medias por grupo, proporciones agrupadas y forest plot de contrastes.
+- Exportación de resultados en **CSV**, **Excel (.xlsx)** y **RDS**.
+- Integración automática con el módulo Tablas.
+
+#### Tablas de resultados
+- Gestión centralizada de todas las estimaciones e inferencias generadas en la sesión.
 - Exportación de resultados en **CSV**, **Excel (.xlsx)**, **RDS**, **JSON** y
   **TXT (tab)**.
 - Vista por pestañas con contador de tablas activas.
@@ -107,8 +117,8 @@ R/
 ├── app_server.R           # Servidor raíz (i18n + orquestación)
 ├── mod_datos_*            # Módulo de carga de datos
 ├── mod_diseno_*           # Módulo de diseño muestral
-├── mod_variables_*        # Módulo de variables derivadas
 ├── mod_estimacion_*       # Módulo de estimación
+├── mod_inferencia_*       # Módulo de inferencia estadística
 ├── mod_tablas_*           # Módulo de tablas de resultados
 ├── design.R               # Lógica de construcción del diseño
 ├── estimate_survey.R      # Estimadores con corrección por diseño
@@ -155,14 +165,6 @@ require rigorous estimates that respect the underlying sampling design structure
 - Automatic generation of the equivalent R code (`svydesign`).
 - Built-in design diagnostics.
 
-#### Derived variables *(new)*
-- Create new variables on top of the active survey design.
-- **Basic mode**: arithmetic operations, math functions, binary indicators,
-  recodings, and interval cuts.
-- **Expert mode**: arbitrary multi-line R expressions.
-- Preview of generated code before applying changes.
-- Variable management (delete individually or all at once).
-
 #### Estimation
 - Available estimators: **mean**, **total**, **proportion**, **ratio**, and
   **quantiles**.
@@ -172,8 +174,26 @@ require rigorous estimates that respect the underlying sampling design structure
   variation (CV).
 - Quality indicators to assess estimation reliability.
 
-#### Results tables *(new)*
-- Centralized management of all estimates generated in the session.
+#### Statistical inference *(new)*
+- Five analysis types with complex sampling design correction:
+  - **Gini coefficient** — inequality measurement with weighted Lorenz curve,
+    domain breakdown, and variance estimation via Taylor linearization (`convey`).
+  - **Pearson correlation** — design-weighted correlation with confidence interval
+    via Fisher's Z transformation.
+  - **Hypothesis test** — design-based t-test for difference of means between two
+    groups (`svyttest`), with CI and design-based degrees of freedom.
+  - **Cross-tabulation** — proportion tables and independence test with Rao-Scott
+    chi-square correction (F, Chi², and Wald statistics).
+  - **Linear contrasts** — multiple pairwise comparisons with Bonferroni
+    correction; interactive editor for custom contrast matrices.
+- Theoretical framework with mathematical formulation (MathJax) per analysis type.
+- Analysis-specific visualizations: Lorenz curve, scatter plot, group means chart,
+  grouped proportions, and contrasts forest plot.
+- Export results as **CSV**, **Excel (.xlsx)**, and **RDS**.
+- Automatic integration with the Tables module.
+
+#### Results tables
+- Centralized management of all estimates and inference results generated in the session.
 - Export results as **CSV**, **Excel (.xlsx)**, **RDS**, **JSON**, or
   **TXT (tab-delimited)**.
 - Tab-based view with active table counter.
@@ -224,8 +244,8 @@ R/
 ├── app_server.R           # Root server (i18n + orchestration)
 ├── mod_datos_*            # Data loading module
 ├── mod_diseno_*           # Sampling design module
-├── mod_variables_*        # Derived variables module
 ├── mod_estimacion_*       # Estimation module
+├── mod_inferencia_*       # Statistical inference module
 ├── mod_tablas_*           # Results tables module
 ├── design.R               # Design construction logic
 ├── estimate_survey.R      # Design-based estimators
