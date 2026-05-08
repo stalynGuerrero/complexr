@@ -8,13 +8,15 @@ Authors@R:
       role = c("aut", "cre")
     )
 Description:
-    Provides a tidyverse-oriented framework for the analysis of complex survey data.
-    The package supports data ingestion from multiple formats, construction and
-    diagnosis of complex survey designs, and estimation of basic survey statistics
-    such as means, totals, and proportions with associated measures of uncertainty.
-    It is designed as a reusable statistical backend that can be used programmatically
-    or integrated into interactive applications built with Shiny.
-License: GPL (>= 3) + file LICENSE
+    Provides a Shiny-based interactive interface for the analysis of complex survey
+    data, implementing design-based inference methods as described in Lumley (2004)
+    <doi:10.18637/jss.v009.i08>. The package supports data ingestion from multiple
+    file formats, construction and diagnosis of complex survey designs with
+    stratification and clustering, and estimation of means, totals, and proportions
+    with associated standard errors and confidence intervals. A multilingual interface
+    facilitates the exploration of survey results without requiring specialized
+    programming knowledge.
+License: GPL (>= 3)
 URL: https://github.com/stalynGuerrero/complexr
 BugReports: https://github.com/stalynGuerrero/complexr/issues
 Encoding: UTF-8
@@ -43,11 +45,14 @@ Imports:
     DT,
     tidyselect
 Suggests:
+    convey,
     knitr,
     rmarkdown,
     quarto,
     printr,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    spelling
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 Config/roxygen2/version: 8.0.0
+Language: en-US

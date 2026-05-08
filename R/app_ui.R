@@ -474,7 +474,19 @@ app_ui <- function() {
       ),
       
       # ============================================================
-      # PESTAÑA 4 — Tablas de estimaciones
+      # PESTAÑA 4 — Inferencia estadística
+      # ============================================================
+      shiny::tabPanel(
+        title = shiny::tagList(
+          shiny::tags$i(class = "fa fa-flask"),
+          shiny::textOutput("tab_inferencia", inline = TRUE)
+        ),
+        value = "inferencia",
+        mod_inferencia_ui("inferencia")
+      ),
+
+      # ============================================================
+      # PESTAÑA 5 — Tablas de estimaciones
       # ============================================================
       shiny::tabPanel(
         title = shiny::tagList(

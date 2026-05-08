@@ -1,4 +1,7 @@
-mod_tablas_server <- function(id, est_results, est_meta, dict) {
+mod_tablas_server <- function(id, est_results, est_meta,
+                              inf_results = shiny::reactive(NULL),
+                              inf_meta    = shiny::reactive(NULL),
+                              dict) {
 
   shiny::moduleServer(id, function(input, output, session) {
 
@@ -40,6 +43,32 @@ mod_tablas_server <- function(id, est_results, est_meta, dict) {
         meta = if (is.null(meta)) {
           list(
             estimator = "?",
+            variable  = "",
+            domains   = character(0),
+            timestamp = Sys.time()
+          )
+        } else {
+          meta
+        },
+        data = res
+      )
+    }, ignoreNULL = TRUE, ignoreInit = TRUE)
+
+    # ---- Capturar nuevo resultado de inferencia ----
+    shiny::observeEvent(inf_results(), {
+      res  <- inf_results()
+      meta <- inf_meta()
+      shiny::req(res)
+
+      n       <- counter() + 1L
+      counter(n)
+      item_id <- paste0("inf_", n)
+
+      tables_store$items[[item_id]] <- list(
+        n    = n,
+        meta = if (is.null(meta)) {
+          list(
+            estimator = "Inferencia",
             variable  = "",
             domains   = character(0),
             timestamp = Sys.time()

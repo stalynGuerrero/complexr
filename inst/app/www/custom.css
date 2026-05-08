@@ -59,6 +59,8 @@
   --color-estimacion-light: rgba(82,183,136,0.10);
   --color-tablas:           #F4A261;
   --color-tablas-light:     rgba(244,162,97,0.10);
+  --color-inferencia:       #7B5EA7;
+  --color-inferencia-light: rgba(123,94,167,0.10);
 
   /* Sombras */
   --shadow-sm:        0 1px 3px rgba(0,40,86,0.08), 0 1px 2px rgba(0,40,86,0.04);
@@ -989,4 +991,20 @@ hr {
   background: var(--color-tablas-light);
   color: var(--color-tablas);
   border-color: rgba(244,162,97,0.22);
+}
+
+/* ── Inferencia estadística (Violeta #7B5EA7) ── */
+.sidebar-card--inferencia {
+  border-top-color: var(--color-inferencia) !important;
+}
+.card-header-block--inferencia {
+  background: linear-gradient(90deg, rgba(123,94,167,0.06) 0%, #F5FAFD 100%);
+}
+.card-header-block--inferencia .fa {
+  color: var(--color-inferencia) !important;
+}
+.page-header--inferencia .page-header-icon {
+  background: var(--color-inferencia-light);
+  color: var(--color-inferencia);
+  border-color: rgba(123,94,167,0.22);
 }

@@ -37,6 +37,9 @@ app_server <- function(input, output, session) {
   output$tab_estimacion <- shiny::renderText({
     i18n_t(dict(), "app.tabs.estimacion")
   })
+  output$tab_inferencia <- shiny::renderText({
+    i18n_t(dict(), "app.tabs.inferencia")
+  })
   output$tab_tablas <- shiny::renderText({
     i18n_t(dict(), "app.tabs.tablas")
   })
@@ -106,7 +109,19 @@ app_server <- function(input, output, session) {
   estimacion_res <- mod_estimacion_server("estimacion", diseno_res$design, dict)
 
   # =========================
+  # Módulo: Inferencia estadística
+  # =========================
+  inferencia_res <- mod_inferencia_server("inferencia", diseno_res$design, dict)
+
+  # =========================
   # Módulo: Tablas de estimaciones
   # =========================
-  mod_tablas_server("tablas", estimacion_res$results, estimacion_res$meta, dict)
+  mod_tablas_server(
+    "tablas",
+    estimacion_res$results,
+    estimacion_res$meta,
+    inferencia_res$results,
+    inferencia_res$meta,
+    dict
+  )
 }
