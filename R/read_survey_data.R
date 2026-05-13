@@ -37,13 +37,13 @@
 #' }
 #'
 #' @examples
-#' \dontrun{
-#' df <- read_survey_data("data/sample.csv")
-#' df <- read_survey_data("data/sample.sav")
-#' df <- read_survey_data("data/sample.dta")
-#' df <- read_survey_data("data/sample.sas7bdat")
+#' csv_path <- system.file("extdata", "simulated_survey_data.csv", package = "complexr")
+#' df <- read_survey_data(csv_path)
 #' attr(df, "source_format")
-#' }
+#'
+#' rds_path <- system.file("extdata", "simulated_survey_data.rds", package = "complexr")
+#' df2 <- read_survey_data(rds_path)
+#' attr(df2, "source_format")
 #'
 #' @export
 read_survey_data <- function(

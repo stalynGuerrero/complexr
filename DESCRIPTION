@@ -1,5 +1,5 @@
 Package: complexr
-Title: Shiny Interface for Complex Survey Data Analysis
+Title: 'Shiny' Interface for Complex Survey Data Analysis
 Version: 1.0.0
 Authors@R:
     person(
@@ -8,7 +8,7 @@ Authors@R:
       role = c("aut", "cre")
     )
 Description:
-    Provides a Shiny-based interactive interface for the analysis of complex survey
+    Provides a 'Shiny'-based interactive interface for the analysis of complex survey
     data, implementing design-based inference methods as described in Lumley (2004)
     <doi:10.18637/jss.v009.i08>. The package supports data ingestion from multiple
     file formats, construction and diagnosis of complex survey designs with
