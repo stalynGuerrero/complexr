@@ -47,7 +47,7 @@ estructura del diseño muestral.
   de variación (CV).
 - Indicadores de calidad para evaluar la confiabilidad de las estimaciones.
 
-#### Inferencia estadística *(nuevo)*
+#### Inferencia estadística
 - Cinco tipos de análisis con corrección por diseño muestral complejo:
   - **Coeficiente de Gini** — desigualdad con curva de Lorenz ponderada, desglose
     por dominio y estimación de varianza por linearización de Taylor (`convey`).
@@ -174,7 +174,7 @@ require rigorous estimates that respect the underlying sampling design structure
   variation (CV).
 - Quality indicators to assess estimation reliability.
 
-#### Statistical inference *(new)*
+#### Statistical inference
 - Five analysis types with complex sampling design correction:
   - **Gini coefficient** — inequality measurement with weighted Lorenz curve,
     domain breakdown, and variance estimation via Taylor linearization (`convey`).
