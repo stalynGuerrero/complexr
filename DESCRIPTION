@@ -1,6 +1,6 @@
 Package: complexr
 Title: 'Shiny' Interface for Complex Survey Data Analysis
-Version: 1.0.0
+Version: 1.0.1
 Authors@R:
     person(
       "Stalyn", "Guerrero Gómez",
