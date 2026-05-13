@@ -46,6 +46,7 @@ utils::globalVariables(c(
   
   # educación derivada
   "educ_num",
+  "educ_hogar",
   "educ_effect",
   
   # ingresos

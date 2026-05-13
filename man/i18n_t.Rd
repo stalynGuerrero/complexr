@@ -2,18 +2,31 @@
 % Please edit documentation in R/i18n.R
 \name{i18n_t}
 \alias{i18n_t}
-\title{Translate key from dictionary}
+\title{Translate a key from a language dictionary}
 \usage{
 i18n_t(dict, key)
 }
 \arguments{
-\item{dict}{list}
+\item{dict}{List. A translation dictionary returned by \code{i18n_load()}.}
 
-\item{key}{character (e.g. "mod_datos.title")}
+\item{key}{Character. A dot-separated path to the translation string, e.g.
+\code{"mod_datos.title"}.}
 }
 \value{
-character
+A character string with the translated text, or \code{key} when the
+path does not exist.
 }
 \description{
-Translate key from dictionary
+Resolves a dot-separated key path in a nested translation list returned by
+\code{\link{i18n_load}}. Returns the key itself when the path is not found,
+so the interface degrades gracefully on missing translations.
+}
+\examples{
+dict <- i18n_load("en")
+i18n_t(dict, "mod_datos.title")
+i18n_t(dict, "nonexistent.key")  # returns "nonexistent.key"
+
+}
+\seealso{
+\code{\link{i18n_load}}
 }

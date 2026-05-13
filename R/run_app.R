@@ -1,8 +1,15 @@
 #' Run complexr application
 #'
-#' Launches the Shiny app bundled within the package.
+#' Launches the Shiny app bundled within the package in the default browser.
 #'
-#' @return Launches a Shiny application.
+#' @return Called for its side effect: opens the Shiny application. Returns
+#'   invisibly when the app is stopped.
+#'
+#' @examples
+#' \dontrun{
+#' run_app()
+#' }
+#'
 #' @export
 run_app <- function() {
 

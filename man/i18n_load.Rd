@@ -2,18 +2,30 @@
 % Please edit documentation in R/i18n.R
 \name{i18n_load}
 \alias{i18n_load}
-\title{Load language dictionary from JSON}
+\title{Load a language dictionary from JSON}
 \usage{
 i18n_load(lang, path = "app/www/i18n")
 }
 \arguments{
-\item{lang}{character ("es", "en", ...)}
+\item{lang}{Character. Language code, e.g. \code{"en"} (English) or
+\code{"es"} (Spanish).}
 
-\item{path}{relative path inside inst/}
+\item{path}{Character. Path inside \code{inst/} to the directory that
+contains the JSON translation files.
+Defaults to \code{"app/www/i18n"}.}
 }
 \value{
-list
+A named list with the translation dictionary.
 }
 \description{
-Load language dictionary from JSON
+Reads a JSON translation file from the package's \code{inst/} directory and
+returns it as a nested list suitable for use with \code{\link{i18n_t}}.
+}
+\examples{
+dict <- i18n_load("en")
+i18n_t(dict, "mod_datos.title")
+
+}
+\seealso{
+\code{\link{i18n_t}}
 }

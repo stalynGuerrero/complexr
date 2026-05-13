@@ -7,8 +7,15 @@
 run_app()
 }
 \value{
-Launches a Shiny application.
+Called for its side effect: opens the Shiny application. Returns
+invisibly when the app is stopped.
 }
 \description{
-Launches the Shiny app bundled within the package.
+Launches the Shiny app bundled within the package in the default browser.
+}
+\examples{
+\dontrun{
+run_app()
+}
+
 }
